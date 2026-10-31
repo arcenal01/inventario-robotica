@@ -1,7 +1,7 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.8.1 (padrão: v0.<bloco>.0; correções = v0.<bloco>.1; v1.0.0 só na `main` ao final)
-Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
+Versão atual: v0.13.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
 - Bloco 1: modelo de dados (docs/01-modelo-de-dados.md)
@@ -12,7 +12,14 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
-- v0.8.1 (validação do Bloco 6 no PC do usuário, em andamento): Git 2.56, WSL2 e Docker Desktop 4.97 instalados; `supabase init` (config.toml); db:start aplicou 0001-0006 + seed; db:testes 7/7 arquivos OK; db:tipos gerou o database.ts oficial; .env.local criado; npm install, lint, typecheck, test e build OK; @supabase/ssr 0.6.1 -> 0.12.7; package-lock.json gerado; migration 0006 (código de item com 3 dígitos por prefixo) + bloco6_codigo_item_testes.sql
+- Bloco 13 (v0.13.0): painel no Início e relatórios (src/features/relatorios, rotas /relatorios e /relatorios/[tipo], docs/13-painel-relatorios.md, tests/relatorios.test.mjs); sem migration nova
+- Interface nova (feature/ui-tema-escuro, aprovada pelo usuário): tema escuro grafite + azul elétrico padrão, claro opcional, menu lateral com ícones, lucide-react, fonte Geist
+- Bloco 12 (v0.12.0): contagens (0009_contagem_telas.sql, bloco12_testes.sql, src/features/contagens, src/features/leitor, rotas /contagens, /contagens/[id], /contagens/[id]/contar, card no Início, docs/12-contagens.md, tests/contagens.test.mjs); biblioteca nova jsqr
+- Bloco 11 (v0.11.0): romaneios (src/features/romaneios, rotas /romaneios, /romaneios/novo, /romaneios/[id], /romaneios/[id]/imprimir, botão Gerar romaneio no pedido, docs/11-romaneios.md, tests/romaneios.test.mjs); sem migration nova
+- Bloco 10 (v0.10.0): pedidos e notificações (src/features/pedidos, src/features/notificacoes, rotas /pedidos, /pedidos/novo, /pedidos/[id], /pedidos/[id]/editar, /notificacoes, sino no cabeçalho, docs/10-pedidos.md, tests/pedidos.test.mjs); sem migration nova
+- Bloco 9 (v0.9.0): movimentações e empréstimos (src/features/estoque, src/features/emprestimos, rotas /movimentacoes, /emprestimos e /menu, src/lib/chave.ts, datas.ts, erros.ts, docs/09-movimentacoes-emprestimos.md, tests/emprestimos.test.mjs); sem migration nova
+- Bloco 8B (v0.8.2): itens e categorias (0008_itens_fotos_estoque.sql, bloco8b_testes.sql, src/features/itens, rotas /itens e /itens/categorias, docs/08b-itens.md, tests/itens.test.mjs)
+- v0.8.1 (validação do Bloco 6 no PC do usuário, CONCLUÍDA): repositório público https://github.com/arcenal01/inventario-robotica com main e homologacao; PR #1 (só para testar o CI) passou nos 2 workflows e foi fechado sem merge; Git 2.56, WSL2 e Docker Desktop 4.97 instalados; `supabase init` (config.toml); db:start aplicou 0001-0006 + seed; db:testes 7/7 arquivos OK; db:tipos gerou o database.ts oficial; .env.local criado; npm install, lint, typecheck, test e build OK; @supabase/ssr 0.6.1 -> 0.12.7; package-lock.json gerado; migration 0006 (código de item com 3 dígitos por prefixo) + bloco6_codigo_item_testes.sql; migration 0007 (perda idempotente em emprestimo_perdas + turma no cadastro) + bloco6b_perdas_turma_testes.sql; campo Turma no cadastro e na tela /usuarios; branches protegidas
 
 ## Decisões tomadas
 - Primeiro admin criado manualmente por SQL; professor aprovado pelo admin
@@ -20,6 +27,78 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - Prefixos de categoria editáveis; unidades em lista fixa (un, m, kg); "un" só aceita quantidade inteira
 - Código de item (v0.8.1, confirmado pelo usuário): prefixo da categoria + contador POR PREFIXO de 3 dígitos (SEN-001, SEN-002, MOT-001); passa de 999 sem cortar (SEN-1000); definitivo. Migration nova 0006 (não altera a 0001); contador em contadores_codigo com ano = 0, ligado ao prefixo (não à categoria) para nunca repetir código se um prefixo for trocado e reaproveitado
 - Códigos de PED/ROM/CNT continuam com 4 dígitos (PED-2026-0001)
+- Perda de empréstimo (v0.8.1, confirmado pelo usuário): marcar_emprestimo_perdido(emprestimo, quantidade, motivo, chave) com chave_idempotencia OBRIGATÓRIA; cada perda vira linha imutável em emprestimo_perdas (aluno vê as dos próprios empréstimos); reenvio da mesma chave devolve duplicada = true; quantidade nula = todo o pendente
+- Turma no cadastro (v0.8.1, confirmado pelo usuário): campo opcional (professores usam o mesmo cadastro), até 30 caracteres; vai nos metadados do Auth e o trigger criar_perfil_novo_usuario grava em perfis.turma; aparece e é pesquisável em /usuarios
+- Tela de notificações (sino): fica no Bloco 10 (pedidos), confirmado pelo usuário
+
+### Bloco 8B (itens)
+- Migration 0008 (aditiva): bucket itens-fotos (público para leitura, envio/troca/remoção só professor/admin, 2 MB, jpeg/png/webp); view vw_itens_estoque (security_invoker); trigger proteger_item
+- foto_url guarda o CAMINHO no bucket (<item_id>/<timestamp>.jpg), não a URL: vale local e na nuvem; o app monta a URL pública
+- Foto reduzida no aparelho (máx. 1024 px, JPEG 0,82) antes do envio; input com capture="environment" abre a câmera no celular; trocar foto apaga a antiga; falha na foto não desfaz o cadastro
+- Unidade e tipo de controle não mudam depois que o item tem movimentação ou saldo (banco); a tela trava os campos quando há saldo ou empréstimo
+- Estoque mínimo inteiro em "un" (banco e tela); 0 = sem alerta; abaixo_minimo só para item ativo com mínimo > 0
+- Categorias: professor e admin criam/editam/desativam (confirmado pelo usuário, mantém o RLS do Bloco 2); excluir só admin; trocar prefixo não muda códigos existentes
+- Especificações: pares nome = valor em itens.especificacoes (jsonb), até 20, sem nome repetido
+- Lista: carrega todos os itens e filtra no aparelho (busca sem acento em código/nome/descrição; filtros categoria, tipo, situação, abaixo do mínimo); abaixo do mínimo primeiro
+- Item não é excluído pela tela: usar inativo
+- Rotas: /itens (todos aprovados), /itens/categorias (professor/admin); menu ganhou "Itens"
+
+### Bloco 9 (movimentações e empréstimos)
+- Sem migration: as telas usam as RPCs do Bloco 3 (registrar_entrada, registrar_saida, transferir, ajustar, emprestar, devolver) e a marcar_emprestimo_perdido da 0007
+- Uma chave_idempotencia por janela aberta, reaproveitada em toda tentativa (reenvio não duplica); src/lib/chave.ts gera UUID v4 também sem crypto.randomUUID (celular em http://IP)
+- /movimentacoes só professor/admin (o ledger já era só deles pelo RLS); histórico: 200 mais recentes, filtros período/tipo/item
+- /emprestimos para todos: professor/admin veem tudo e agem; aluno vê "Meus empréstimos" (RLS) sem botões
+- Atraso calculado na tela com a data de Brasília (mesma regra da view do banco); atrasados primeiro
+- Devolução sugere a posição de origem (se ainda ativa); perda não mexe no saldo
+- Ficha do item ganhou atalho "Registrar entrada" (professor/admin)
+- Menu: campo principal em src/lib/navegacao.ts; celular mostra os principais + "Mais" (/menu); topo mostra tudo com rolagem
+- tsconfig: allowImportingTsExtensions (módulos puros importam .ts entre si para rodar no node --test)
+
+### Bloco 10 (pedidos e notificações)
+- Sem migration: usa salvar_pedido, enviar_pedido, decidir_pedido, cancelar_pedido e concluir_pedido (Bloco 4)
+- Qualquer usuário aprovado cria pedido; rascunho só o autor vê/edita (na lista da equipe, rascunhos alheios ficam ocultos)
+- Carrinho: item repetido, quantidade > 0 e inteiro em "un" validados na tela (e no banco); pedir acima do estoque só gera aviso
+- Projeto/turma vem preenchido com a turma do cadastro (0007)
+- Aprovação manda para o banco só as quantidades que mudaram; 0 tira o item; rejeição exige motivo
+- Botões por papel/status em src/features/pedidos/regras.ts (espelham as funções do banco)
+- Sino: contagem de não lidas a cada 60 s; /notificacoes com as 50 últimas; tocar marca lida e abre a tela (pedidos, trocas_qr, romaneios)
+- Menu: Pedidos entra nos principais do celular (Início, Itens, Pedidos, Empréstimos + Mais)
+
+### Bloco 11 (romaneios)
+- Sem migration: usa gerar_romaneio_do_pedido, gerar_romaneio_avulso, marcar_item_separado, concluir_separacao, entregar_romaneio e cancelar_romaneio (Bloco 4)
+- /romaneios só professor/admin; aluno vê o código do romaneio no próprio pedido (RLS já permitia)
+- Checklist agrupado pelo primeiro nível do código do endereço (ARM01, EST01...) e em ordem natural de código
+- Entrega: recebedor padrão = solicitante; conferência por linha (padrão = separado); uma chave por janela de entrega
+- Gerar do pedido pede prazo de devolução só se houver emprestável aprovado
+- PDF = página de impressão (/romaneios/[id]/imprimir) + "Salvar como PDF" do navegador (sem biblioteca nova), com assinaturas de quem separou e de quem recebeu
+- O módulo de pedidos não importa o de romaneios: a página do pedido usa PedidoComRomaneio (romaneios/gerar-do-pedido.tsx), que injeta o botão
+- Início: card "Em construção" atualizado
+
+### Interface (aprovada pelo usuário)
+- Tema escuro padrão (classe .dark no <html>, script no <head> evita piscar), claro opcional salvo no aparelho (localStorage "tema")
+- Computador: menu lateral fixo com ícones; celular: barra de baixo com ícones + "Mais"; ícones em src/lib/icones.ts
+- No escuro, as cores de aviso do Tailwind (red/emerald/amber) são remapeadas em globals.css, sem mexer nas telas
+- Impressão SEMPRE em papel branco: bloco @media print fora de @layer (corrigido no Bloco 13; antes saía escuro)
+- Demonstração: toda mudança de visual termina com o app aberto no Chrome do usuário, já logado (pedido do usuário)
+
+### Bloco 13 (painel e relatórios)
+- Sem migration: a RLS das tabelas/views decide o que cada um vê (aluno: só os próprios pedidos e empréstimos)
+- Painel: 4 indicadores (abaixo do mínimo, pedidos, empréstimos com atrasados, contagens) que ficam amarelos quando há pendência; lista dos 5 itens mais críticos; últimas 6 movimentações (equipe) ou meus pedidos (aluno)
+- Relatórios só professor/admin: estoque por endereço, movimentações por período, empréstimos (abertos/atrasados/com perda/todos), divergências por contagem
+- CSV para Excel pt-BR: BOM UTF-8, ";" entre colunas, vírgula decimal, gerado no aparelho (funciona offline depois)
+- PDF = imprimir a própria tela (sem biblioteca), com cabeçalho de emissão; filtros e menus somem na impressão
+- Período em horário de Brasília (início do dia "de" ao fim do dia "até"); período inválido não consulta o banco
+- Limite de 5000 linhas por relatório, com aviso
+
+### Bloco 12 (contagens)
+- Migration 0009 (aditiva): posicoes_da_contagem e itens_para_contar (security definer, só aprovados, SEM quantidades: o aluno não vê o que os outros contaram)
+- Tela de contar NÃO mostra o saldo do sistema; branco = não contei agora (pendente); 0 = procurei e não achei; item achado a mais pela busca (por categoria: só itens da categoria)
+- Uma posição por envio (registrar_contagem), chave de idempotência por posição, reaproveitada em reenvio; resposta "duplicada" vira aviso, nunca silêncio
+- Leitor de QR: jsqr carregado só ao abrir a câmera; câmera traseira; ~6 quadros/s em imagem reduzida; câmera desligada após a leitura; precisa de https/localhost (celular: Bloco 14), senão digitar o código
+- Etiqueta antiga (endereço substituído na troca de QR) é reconhecida e a tela oferece contar o endereço novo (segue a cadeia de trocas) — resolve a pendência do Bloco 8A
+- Encerrar: posições vazias no sistema não geram aviso; posições com material sem contagem ficam como estão (p_forcar automático com confirmação); itens não contados em posição contada viram "não listado"
+- Revisão do professor: última rodada de cada item/posição, filtro "só divergências", recontagem por item; aprovação mostra antes quantos ajustes serão gerados
+- Contagens visíveis para todos os aprovados (menu "Contagens" em Mais); Início mostra card quando há contagem recebendo contagens
 - Toda entrada de estoque exige endereço; saldo só em posições (tipo com armazena_itens = true)
 - Endereços em árvore; tipos_endereco só pelo admin; endereço não muda de pai/tipo (troca de QR = novo endereço + substituido_por_id)
 - Tabelas de negócio sem escrita direta: só funções RPC (security definer)
@@ -47,6 +126,8 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - package.json fica na RAIZ (Next.js na raiz, junto de supabase/); lint = eslint, typecheck = tsc --noEmit, test = node --test (schemas), db:tipos gera src/types/database.ts
 - Variáveis: .env.example no repositório; .env.local para dev; .env.homologacao e .env.producao fora do repositório (.gitignore ignora .env*, exceto o exemplo)
 - GitHub: branches main e homologacao; primeiro envio direto em homologacao (exceção única, sem CI ainda); depois sempre feature/* > PR > homologacao > PR > main; tags vX.Y.Z na main
+- Branches protegidas (v0.8.1): main e homologacao exigem PR e o check "Lint e tipos" (o check do banco não é obrigatório porque só roda quando o PR mexe em supabase/); sem aprovação mínima (dev solo); sem force push
+- GitHub (v0.8.1): conta arcenal01, repositório PÚBLICO (escolha do usuário); commits como luizgg4502 <luizgg4502@gmail.com>; GitHub CLI (gh) instalado e logado no PC
 - CI (ci.yml): lint + checagem de tipos em cada PR; banco.yml (opcional): sobe Supabase no GitHub, aplica migrations/seed e roda os testes SQL quando o PR mexe em supabase/
 - Testes SQL usam prefixos próprios (TSB, TST, TSQ, TSC...) para não colidir com o seed
 - Celular: para testar telas, apontar NEXT_PUBLIC_SUPABASE_URL para o IP do computador; PWA/HTTPS só no Bloco 14
@@ -82,23 +163,18 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - Biblioteca nova: qrcode.react
 
 ## Pendências
-- Validação do Bloco 6 (continua): configurar nome/e-mail do Git, `git init`, branches main/homologacao, primeiro commit e primeiro envio ao GitHub (repositório ainda não criado); rodar o workflow banco.yml no GitHub
-- Leitor de QR (Bloco 12) deve reconhecer etiqueta antiga (endereço substituído) e indicar o código novo
-- Tela de notificações (sino) ainda não existe; as notificações de troca de QR já são gravadas em notificacoes
-- Bloco 8B (itens): bucket de fotos (Storage), lista com busca/filtros, cadastro
-- Cadastro sem campo de turma (o trigger criar_perfil_novo_usuario não lê turma dos metadados): se quiserem, migration 0006 + campo no formulário
+- Câmera no celular depende do HTTPS do Bloco 14 (no PC em localhost já funciona)
+- Contagem offline: Bloco 15 (a chave de idempotência por posição já está pronta para a fila)
 - Nuvem: se a confirmação de e-mail estiver ligada, o cadastro mostra "confirme seu e-mail" (já tratado na tela)
 - Offline das telas de login/usuários: Blocos 14 e 15
 - HTTPS no celular + proxy para o Supabase local: Bloco 14
 - Romaneio: saldo não reservado; se o estoque mudar entre gerar e entregar, a entrega falha e nada é baixado
 
 ## Problemas conhecidos
-- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, 15 testes e build OK (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
-- v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0006 e seed aplicados sem erro; os 7 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
-- v0.6.1: migrations 0001-0004, seed e os 4 arquivos de teste foram executados num Postgres 16 puro com um "esqueleto" do Supabase (roles anon/authenticated/service_role, schema auth e extensions simulados): sem erro de SQL e sem "FALHOU". Isso NÃO substitui o `npm run db:start` real: o auth.users do GoTrue real pode ter colunas diferentes do simulado (o seed é o ponto mais sensível)
-- Workflow banco.yml ainda não foi executado (precisa do repositório no GitHub)
-- package-lock.json gerado na v0.8.1: commitar junto (o CI usa `npm ci`)
+- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, testes unitários (60) e build OK; v0.11.0: todas as 25 rotas (v0.12.0) abertas com sessão real (professor e aluno) num `next start`, sem erro de servidor (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
+- v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0008 e seed aplicados sem erro (db:reset); os 9 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
+- v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
+- v0.12.0: telas de contagem testadas num Chrome sem janela (cliques reais de professor e 2 alunos, 36 verificações, sem erro no console) e leitor de QR testado com câmera falsa usando a etiqueta gerada pelo app (8 verificações)
+- v0.13.0: painel e relatórios testados no Chrome sem janela (professor e aluno, download real dos CSV, PDF gerado e conferido em papel branco, 27 verificações, sem erro no console)
 - Contagem não é "às cegas": alunos podem ler saldos (necessário para a consulta offline)
-- marcar_emprestimo_perdido não tem chave de idempotência: usar só online
 - O seed cria usuários direto em auth.users; se a versão local do Supabase mudar as colunas, ajustar o seed
-- Se já aplicou a 0001 antiga (código com 6 dígitos), rode o comando de correção da resposta do Bloco 3
