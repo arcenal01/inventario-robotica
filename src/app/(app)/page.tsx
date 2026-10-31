@@ -9,11 +9,18 @@ export const metadata: Metadata = { title: "Início" };
 
 export default async function PaginaInicio() {
   const perfil = await exigirAprovado();
+  const supabase = await criarClienteServidor();
+
+  // Contagens recebendo contagens: todos podem participar
+  const { count: contagens } = await supabase
+    .from("contagens")
+    .select("id", { count: "exact", head: true })
+    .in("status", ["aberta", "em_andamento"]);
+  const contagensAbertas = contagens ?? 0;
 
   let pendentes = 0;
   let trocasPendentes = 0;
   if (perfil.perfil !== "aluno") {
-    const supabase = await criarClienteServidor();
     const { count } = await supabase
       .from("perfis")
       .select("id", { count: "exact", head: true })
@@ -59,6 +66,20 @@ export default async function PaginaInicio() {
         </Link>
       ) : null}
 
+      {contagensAbertas > 0 ? (
+        <Link href="/contagens" className="block">
+          <Card className="transition-colors hover:bg-accent">
+            <CardHeader className="flex-row items-center justify-between gap-3">
+              <div className="space-y-1.5">
+                <CardTitle>Contagem de estoque</CardTitle>
+                <CardDescription>Leia o QR das posições e informe o que encontrou.</CardDescription>
+              </div>
+              <Badge variant="warning">{contagensAbertas} em andamento</Badge>
+            </CardHeader>
+          </Card>
+        </Link>
+      ) : null}
+
       <Link href="/enderecos" className="block">
         <Card className="transition-colors hover:bg-accent">
           <CardHeader>
@@ -72,11 +93,11 @@ export default async function PaginaInicio() {
         <CardHeader>
           <CardTitle>Em construção</CardTitle>
           <CardDescription>
-            Itens, movimentações, pedidos, romaneios e contagens chegam nos próximos blocos.
+            Painel e relatórios chegam no próximo bloco.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Por enquanto o sistema já tem login, aprovação de cadastros, controle de acesso por perfil e endereços com QR Code.
+          Já funcionam: cadastros e aprovação, endereços com QR, itens, movimentações, empréstimos, pedidos, romaneios e contagens.
         </CardContent>
       </Card>
     </div>

@@ -115,6 +115,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "itens"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "contagem_itens_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
+      referencedColumns: ["id"]
     }
                   ]
                 },"contagens": {
@@ -155,6 +161,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"emprestimo_perdas": {
+                  Row: {
+                    "chave_idempotencia": string,"criado_em": string,"emprestimo_id": string,"id": string,"motivo": string,"quantidade": number,"registrado_por": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "chave_idempotencia": string,"criado_em"?: string,"emprestimo_id": string,"id"?: string,"motivo": string,"quantidade": number,"registrado_por": string
+                  }
+                  Update: {
+                    "chave_idempotencia"?: string,"criado_em"?: string,"emprestimo_id"?: string,"id"?: string,"motivo"?: string,"quantidade"?: number,"registrado_por"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "emprestimo_perdas_emprestimo_id_fkey"
+      columns: ["emprestimo_id"]
+isOneToOne: false
+      referencedRelation: "emprestimos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimo_perdas_emprestimo_id_fkey"
+      columns: ["emprestimo_id"]
+isOneToOne: false
+      referencedRelation: "vw_emprestimos_abertos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimo_perdas_emprestimo_id_fkey"
+      columns: ["emprestimo_id"]
+isOneToOne: false
+      referencedRelation: "vw_emprestimos_atrasados"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimo_perdas_registrado_por_fkey"
+      columns: ["registrado_por"]
+isOneToOne: false
+      referencedRelation: "perfis"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"emprestimos": {
                   Row: {
                     "atualizado_em": string,"baixado_por": string | null,"criado_em": string,"emprestado_em": string,"emprestado_para": string,"endereco_origem_id": string,"id": string,"item_id": string,"observacao": string | null,"prazo_previsto": string | null,"quantidade": number,"quantidade_devolvida": number,"quantidade_perdida": number,"registrado_por": string,"status": Database["public"]['Enums']["status_emprestimo"]
@@ -190,6 +234,12 @@ isOneToOne: false
       columns: ["item_id"]
 isOneToOne: false
       referencedRelation: "itens"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimos_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "emprestimos_registrado_por_fkey"
@@ -306,6 +356,12 @@ isOneToOne: false
       referencedRelation: "itens"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "movimentacoes_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "movimentacoes_romaneio_fk"
       columns: ["romaneio_id"]
 isOneToOne: false
@@ -384,6 +440,12 @@ isOneToOne: false
       referencedRelation: "itens"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "pedido_itens_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "pedido_itens_pedido_id_fkey"
       columns: ["pedido_id"]
 isOneToOne: false
@@ -460,6 +522,12 @@ isOneToOne: false
       columns: ["item_id"]
 isOneToOne: false
       referencedRelation: "itens"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "romaneio_itens_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "romaneio_itens_movimentacao_id_fkey"
@@ -542,6 +610,12 @@ isOneToOne: false
       columns: ["item_id"]
 isOneToOne: false
       referencedRelation: "itens"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "saldos_por_endereco_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
       referencedColumns: ["id"]
     }
                   ]
@@ -668,6 +742,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "itens"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "contagem_itens_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
+      referencedColumns: ["id"]
     }
                   ]
                 },"vw_contagem_divergencias": {
@@ -706,6 +786,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "itens"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "contagem_itens_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
+      referencedColumns: ["id"]
     }
                   ]
                 },"vw_emprestimos_abertos": {
@@ -726,6 +812,12 @@ isOneToOne: false
 isOneToOne: false
       referencedRelation: "itens"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimos_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
+      referencedColumns: ["id"]
     }
                   ]
                 },"vw_emprestimos_atrasados": {
@@ -745,6 +837,26 @@ isOneToOne: false
       columns: ["item_id"]
 isOneToOne: false
       referencedRelation: "itens"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimos_item_id_fkey"
+      columns: ["item_id"]
+isOneToOne: false
+      referencedRelation: "vw_itens_estoque"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"vw_itens_estoque": {
+                  Row: {
+                    "abaixo_minimo": boolean | null,"atualizado_em": string,"categoria_id": string,"categoria_nome": string,"categoria_prefixo": string,"codigo": string,"criado_em": string,"descricao": string | null,"emprestado_em_aberto": number | null,"enderecos_com_saldo": number | null,"especificacoes": NonNullable<Json>,"estoque_minimo": number,"foto_url": string | null,"id": string,"nome": string,"saldo_total": number | null,"status": Database["public"]['Enums']["status_item"],"tipo_controle": Database["public"]['Enums']["tipo_controle"],"unidade": Database["public"]['Enums']["unidade_medida"]
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "itens_categoria_id_fkey"
+      columns: ["categoria_id"]
+isOneToOne: false
+      referencedRelation: "categorias"
       referencedColumns: ["id"]
     }
                   ]
@@ -911,8 +1023,13 @@ isOneToOne: false
 "hoje_br":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
+"itens_para_contar":
+{ Args: { "p_contagem_id": string,"p_endereco_id": string }; Returns: {
+              "codigo": string,"item_id": string,"nome": string,"situacao": string,"unidade": string
+            }[]
+                           },
 "marcar_emprestimo_perdido":
-{ Args: { "p_emprestimo_id": string,"p_motivo"?: string,"p_quantidade"?: number }; Returns: Json
+{ Args: { "p_chave_idempotencia": string,"p_emprestimo_id": string,"p_motivo": string,"p_quantidade": number }; Returns: Json
                            },
 "marcar_item_separado":
 { Args: { "p_romaneio_item_id": string,"p_separado"?: boolean }; Returns: Json
@@ -922,6 +1039,11 @@ isOneToOne: false
                            },
 "perfil_atual":
 { Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["perfil_usuario"]
+                           },
+"posicoes_da_contagem":
+{ Args: { "p_contagem_id": string }; Returns: {
+              "ativo": boolean,"codigo": string,"contada_por_mim": boolean,"endereco_id": string,"itens_contados": number,"itens_faltando": number,"nome": string,"recontagens": number,"sem_contagem": boolean
+            }[]
                            },
 "registrar_contagem":
 { Args: { "p_chave_idempotencia": string,"p_contagem_id": string,"p_endereco_id": string,"p_itens": Json }; Returns: Json
