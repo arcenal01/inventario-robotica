@@ -22,6 +22,7 @@ npm run dev           # abre o app em http://localhost:3000
 - `docs/06-ambiente-local.md`: ambiente local, Git/GitHub e CI
 - `docs/07-base-nextjs.md`: app Next.js, convenção de nomes, como testar login e aprovação
 - `docs/08a-enderecos.md`: endereços, QR Code e troca de QR
+- `docs/08b-itens.md`: itens, categorias, fotos e saldos
 - `PROGRESSO.md`: o que já foi feito, decisões e pendências
 
 ## Branches

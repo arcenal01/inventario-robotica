@@ -9,6 +9,7 @@ export type ItemNavegacao = {
 /** Menu do app. Cada bloco de tela novo (8 a 13) acrescenta uma linha aqui. */
 export const ITENS_NAVEGACAO: ItemNavegacao[] = [
   { href: "/", rotulo: "Início", papeis: ["admin", "professor", "aluno"] },
+  { href: "/itens", rotulo: "Itens", papeis: ["admin", "professor", "aluno"] },
   { href: "/enderecos", rotulo: "Endereços", papeis: ["admin", "professor", "aluno"] },
   { href: "/usuarios", rotulo: "Usuários", papeis: ["admin", "professor"] },
 ];
