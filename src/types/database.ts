@@ -155,6 +155,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"emprestimo_perdas": {
+                  Row: {
+                    "chave_idempotencia": string,"criado_em": string,"emprestimo_id": string,"id": string,"motivo": string,"quantidade": number,"registrado_por": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "chave_idempotencia": string,"criado_em"?: string,"emprestimo_id": string,"id"?: string,"motivo": string,"quantidade": number,"registrado_por": string
+                  }
+                  Update: {
+                    "chave_idempotencia"?: string,"criado_em"?: string,"emprestimo_id"?: string,"id"?: string,"motivo"?: string,"quantidade"?: number,"registrado_por"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "emprestimo_perdas_emprestimo_id_fkey"
+      columns: ["emprestimo_id"]
+isOneToOne: false
+      referencedRelation: "emprestimos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimo_perdas_emprestimo_id_fkey"
+      columns: ["emprestimo_id"]
+isOneToOne: false
+      referencedRelation: "vw_emprestimos_abertos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimo_perdas_emprestimo_id_fkey"
+      columns: ["emprestimo_id"]
+isOneToOne: false
+      referencedRelation: "vw_emprestimos_atrasados"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "emprestimo_perdas_registrado_por_fkey"
+      columns: ["registrado_por"]
+isOneToOne: false
+      referencedRelation: "perfis"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"emprestimos": {
                   Row: {
                     "atualizado_em": string,"baixado_por": string | null,"criado_em": string,"emprestado_em": string,"emprestado_para": string,"endereco_origem_id": string,"id": string,"item_id": string,"observacao": string | null,"prazo_previsto": string | null,"quantidade": number,"quantidade_devolvida": number,"quantidade_perdida": number,"registrado_por": string,"status": Database["public"]['Enums']["status_emprestimo"]
@@ -912,7 +950,7 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: string
                            },
 "marcar_emprestimo_perdido":
-{ Args: { "p_emprestimo_id": string,"p_motivo"?: string,"p_quantidade"?: number }; Returns: Json
+{ Args: { "p_chave_idempotencia": string,"p_emprestimo_id": string,"p_motivo": string,"p_quantidade": number }; Returns: Json
                            },
 "marcar_item_separado":
 { Args: { "p_romaneio_item_id": string,"p_separado"?: boolean }; Returns: Json
