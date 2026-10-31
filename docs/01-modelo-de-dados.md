@@ -1,5 +1,8 @@
 # Modelo de dados: Inventário Robótica
 
+> Atualizado na v0.8.2 (migration 0008, Bloco 8B): bucket `itens-fotos` no Storage; `itens.foto_url` guarda o CAMINHO no bucket;
+> view `vw_itens_estoque` (saldo total, emprestado, abaixo do mínimo); trigger `proteger_item` (unidade e tipo de controle
+> não mudam depois que há histórico; mínimo inteiro em "un").
 > Atualizado na v0.8.1 (migration 0007): tabela `emprestimo_perdas` (uma linha por perda, imutável, `chave_idempotencia` única);
 > `marcar_emprestimo_perdido` passa a exigir a chave; o cadastro grava `perfis.turma` (opcional) a partir dos metadados.
 > Atualizado na v0.8.1 (migration 0006): código de item com 3 dígitos e contador POR PREFIXO (SEN-001, SEN-002, MOT-001);
