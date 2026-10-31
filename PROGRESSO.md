@@ -12,7 +12,7 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
-- v0.8.1 (validação do Bloco 6 no PC do usuário, em andamento): Git 2.56, WSL2 e Docker Desktop 4.97 instalados; `supabase init` (config.toml); db:start aplicou 0001-0006 + seed; db:testes 7/7 arquivos OK; db:tipos gerou o database.ts oficial; .env.local criado; npm install, lint, typecheck, test e build OK; @supabase/ssr 0.6.1 -> 0.12.7; package-lock.json gerado; migration 0006 (código de item com 3 dígitos por prefixo) + bloco6_codigo_item_testes.sql
+- v0.8.1 (validação do Bloco 6 no PC do usuário, CONCLUÍDA): repositório público https://github.com/arcenal01/inventario-robotica com main e homologacao; PR #1 (só para testar o CI) passou nos 2 workflows e foi fechado sem merge; Git 2.56, WSL2 e Docker Desktop 4.97 instalados; `supabase init` (config.toml); db:start aplicou 0001-0006 + seed; db:testes 7/7 arquivos OK; db:tipos gerou o database.ts oficial; .env.local criado; npm install, lint, typecheck, test e build OK; @supabase/ssr 0.6.1 -> 0.12.7; package-lock.json gerado; migration 0006 (código de item com 3 dígitos por prefixo) + bloco6_codigo_item_testes.sql; migration 0007 (perda idempotente em emprestimo_perdas + turma no cadastro) + bloco6b_perdas_turma_testes.sql; campo Turma no cadastro e na tela /usuarios; branches protegidas
 
 ## Decisões tomadas
 - Primeiro admin criado manualmente por SQL; professor aprovado pelo admin
@@ -20,6 +20,9 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - Prefixos de categoria editáveis; unidades em lista fixa (un, m, kg); "un" só aceita quantidade inteira
 - Código de item (v0.8.1, confirmado pelo usuário): prefixo da categoria + contador POR PREFIXO de 3 dígitos (SEN-001, SEN-002, MOT-001); passa de 999 sem cortar (SEN-1000); definitivo. Migration nova 0006 (não altera a 0001); contador em contadores_codigo com ano = 0, ligado ao prefixo (não à categoria) para nunca repetir código se um prefixo for trocado e reaproveitado
 - Códigos de PED/ROM/CNT continuam com 4 dígitos (PED-2026-0001)
+- Perda de empréstimo (v0.8.1, confirmado pelo usuário): marcar_emprestimo_perdido(emprestimo, quantidade, motivo, chave) com chave_idempotencia OBRIGATÓRIA; cada perda vira linha imutável em emprestimo_perdas (aluno vê as dos próprios empréstimos); reenvio da mesma chave devolve duplicada = true; quantidade nula = todo o pendente
+- Turma no cadastro (v0.8.1, confirmado pelo usuário): campo opcional (professores usam o mesmo cadastro), até 30 caracteres; vai nos metadados do Auth e o trigger criar_perfil_novo_usuario grava em perfis.turma; aparece e é pesquisável em /usuarios
+- Tela de notificações (sino): fica no Bloco 10 (pedidos), confirmado pelo usuário
 - Toda entrada de estoque exige endereço; saldo só em posições (tipo com armazena_itens = true)
 - Endereços em árvore; tipos_endereco só pelo admin; endereço não muda de pai/tipo (troca de QR = novo endereço + substituido_por_id)
 - Tabelas de negócio sem escrita direta: só funções RPC (security definer)
@@ -47,6 +50,8 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - package.json fica na RAIZ (Next.js na raiz, junto de supabase/); lint = eslint, typecheck = tsc --noEmit, test = node --test (schemas), db:tipos gera src/types/database.ts
 - Variáveis: .env.example no repositório; .env.local para dev; .env.homologacao e .env.producao fora do repositório (.gitignore ignora .env*, exceto o exemplo)
 - GitHub: branches main e homologacao; primeiro envio direto em homologacao (exceção única, sem CI ainda); depois sempre feature/* > PR > homologacao > PR > main; tags vX.Y.Z na main
+- Branches protegidas (v0.8.1): main e homologacao exigem PR e o check "Lint e tipos" (o check do banco não é obrigatório porque só roda quando o PR mexe em supabase/); sem aprovação mínima (dev solo); sem force push
+- GitHub (v0.8.1): conta arcenal01, repositório PÚBLICO (escolha do usuário); commits como luizgg4502 <luizgg4502@gmail.com>; GitHub CLI (gh) instalado e logado no PC
 - CI (ci.yml): lint + checagem de tipos em cada PR; banco.yml (opcional): sobe Supabase no GitHub, aplica migrations/seed e roda os testes SQL quando o PR mexe em supabase/
 - Testes SQL usam prefixos próprios (TSB, TST, TSQ, TSC...) para não colidir com o seed
 - Celular: para testar telas, apontar NEXT_PUBLIC_SUPABASE_URL para o IP do computador; PWA/HTTPS só no Bloco 14
@@ -82,23 +87,17 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - Biblioteca nova: qrcode.react
 
 ## Pendências
-- Validação do Bloco 6 (continua): configurar nome/e-mail do Git, `git init`, branches main/homologacao, primeiro commit e primeiro envio ao GitHub (repositório ainda não criado); rodar o workflow banco.yml no GitHub
 - Leitor de QR (Bloco 12) deve reconhecer etiqueta antiga (endereço substituído) e indicar o código novo
-- Tela de notificações (sino) ainda não existe; as notificações de troca de QR já são gravadas em notificacoes
+- Tela de notificações (sino): Bloco 10; as notificações de troca de QR e de pedidos já são gravadas em notificacoes
 - Bloco 8B (itens): bucket de fotos (Storage), lista com busca/filtros, cadastro
-- Cadastro sem campo de turma (o trigger criar_perfil_novo_usuario não lê turma dos metadados): se quiserem, migration 0006 + campo no formulário
 - Nuvem: se a confirmação de e-mail estiver ligada, o cadastro mostra "confirme seu e-mail" (já tratado na tela)
 - Offline das telas de login/usuários: Blocos 14 e 15
 - HTTPS no celular + proxy para o Supabase local: Bloco 14
 - Romaneio: saldo não reservado; se o estoque mudar entre gerar e entregar, a entrega falha e nada é baixado
 
 ## Problemas conhecidos
-- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, 15 testes e build OK (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
-- v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0006 e seed aplicados sem erro; os 7 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
-- v0.6.1: migrations 0001-0004, seed e os 4 arquivos de teste foram executados num Postgres 16 puro com um "esqueleto" do Supabase (roles anon/authenticated/service_role, schema auth e extensions simulados): sem erro de SQL e sem "FALHOU". Isso NÃO substitui o `npm run db:start` real: o auth.users do GoTrue real pode ter colunas diferentes do simulado (o seed é o ponto mais sensível)
-- Workflow banco.yml ainda não foi executado (precisa do repositório no GitHub)
-- package-lock.json gerado na v0.8.1: commitar junto (o CI usa `npm ci`)
+- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, testes unitários (16) e build OK (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
+- v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0007 e seed aplicados sem erro; os 8 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
+- v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
 - Contagem não é "às cegas": alunos podem ler saldos (necessário para a consulta offline)
-- marcar_emprestimo_perdido não tem chave de idempotência: usar só online
 - O seed cria usuários direto em auth.users; se a versão local do Supabase mudar as colunas, ajustar o seed
-- Se já aplicou a 0001 antiga (código com 6 dígitos), rode o comando de correção da resposta do Bloco 3
