@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DetalhePedido } from "@/features/pedidos/detalhe-pedido";
+import { PedidoComRomaneio } from "@/features/romaneios/gerar-do-pedido";
 import { exigirAprovado } from "@/lib/auth/perfil";
 
 export const metadata: Metadata = { title: "Pedido" };
@@ -14,7 +14,7 @@ export default async function PaginaPedido({ params }: { params: Promise<{ id: s
       <Link href="/pedidos" className="text-sm text-primary hover:underline">
         Voltar para pedidos
       </Link>
-      <DetalhePedido id={id} usuarioId={perfil.id} equipe={perfil.perfil !== "aluno"} />
+      <PedidoComRomaneio id={id} usuarioId={perfil.id} equipe={perfil.perfil !== "aluno"} />
     </div>
   );
 }

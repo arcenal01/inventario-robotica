@@ -1,6 +1,6 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.10.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Versão atual: v0.11.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
 Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
@@ -12,6 +12,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
+- Bloco 11 (v0.11.0): romaneios (src/features/romaneios, rotas /romaneios, /romaneios/novo, /romaneios/[id], /romaneios/[id]/imprimir, botão Gerar romaneio no pedido, docs/11-romaneios.md, tests/romaneios.test.mjs); sem migration nova
 - Bloco 10 (v0.10.0): pedidos e notificações (src/features/pedidos, src/features/notificacoes, rotas /pedidos, /pedidos/novo, /pedidos/[id], /pedidos/[id]/editar, /notificacoes, sino no cabeçalho, docs/10-pedidos.md, tests/pedidos.test.mjs); sem migration nova
 - Bloco 9 (v0.9.0): movimentações e empréstimos (src/features/estoque, src/features/emprestimos, rotas /movimentacoes, /emprestimos e /menu, src/lib/chave.ts, datas.ts, erros.ts, docs/09-movimentacoes-emprestimos.md, tests/emprestimos.test.mjs); sem migration nova
 - Bloco 8B (v0.8.2): itens e categorias (0008_itens_fotos_estoque.sql, bloco8b_testes.sql, src/features/itens, rotas /itens e /itens/categorias, docs/08b-itens.md, tests/itens.test.mjs)
@@ -59,6 +60,16 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Botões por papel/status em src/features/pedidos/regras.ts (espelham as funções do banco)
 - Sino: contagem de não lidas a cada 60 s; /notificacoes com as 50 últimas; tocar marca lida e abre a tela (pedidos, trocas_qr, romaneios)
 - Menu: Pedidos entra nos principais do celular (Início, Itens, Pedidos, Empréstimos + Mais)
+
+### Bloco 11 (romaneios)
+- Sem migration: usa gerar_romaneio_do_pedido, gerar_romaneio_avulso, marcar_item_separado, concluir_separacao, entregar_romaneio e cancelar_romaneio (Bloco 4)
+- /romaneios só professor/admin; aluno vê o código do romaneio no próprio pedido (RLS já permitia)
+- Checklist agrupado pelo primeiro nível do código do endereço (ARM01, EST01...) e em ordem natural de código
+- Entrega: recebedor padrão = solicitante; conferência por linha (padrão = separado); uma chave por janela de entrega
+- Gerar do pedido pede prazo de devolução só se houver emprestável aprovado
+- PDF = página de impressão (/romaneios/[id]/imprimir) + "Salvar como PDF" do navegador (sem biblioteca nova), com assinaturas de quem separou e de quem recebeu
+- O módulo de pedidos não importa o de romaneios: a página do pedido usa PedidoComRomaneio (romaneios/gerar-do-pedido.tsx), que injeta o botão
+- Início: card "Em construção" atualizado
 - Toda entrada de estoque exige endereço; saldo só em posições (tipo com armazena_itens = true)
 - Endereços em árvore; tipos_endereco só pelo admin; endereço não muda de pai/tipo (troca de QR = novo endereço + substituido_por_id)
 - Tabelas de negócio sem escrita direta: só funções RPC (security definer)
@@ -130,7 +141,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Romaneio: saldo não reservado; se o estoque mudar entre gerar e entregar, a entrega falha e nada é baixado
 
 ## Problemas conhecidos
-- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, testes unitários (40) e build OK (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
+- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, testes unitários (45) e build OK; v0.11.0: todas as 22 rotas abertas com sessão real (professor e aluno) num `next start`, sem erro de servidor (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
 - v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0008 e seed aplicados sem erro (db:reset); os 9 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
 - v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
 - Contagem não é "às cegas": alunos podem ler saldos (necessário para a consulta offline)

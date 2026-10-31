@@ -25,6 +25,7 @@ npm run dev           # abre o app em http://localhost:3000
 - `docs/08b-itens.md`: itens, categorias, fotos e saldos
 - `docs/09-movimentacoes-emprestimos.md`: entradas, saídas, transferências, ajustes e empréstimos
 - `docs/10-pedidos.md`: pedidos, aprovação e notificações
+- `docs/11-romaneios.md`: separação, entrega com conferência e PDF
 - `PROGRESSO.md`: o que já foi feito, decisões e pendências
 
 ## Branches
