@@ -47,6 +47,7 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - package.json fica na RAIZ (Next.js na raiz, junto de supabase/); lint = eslint, typecheck = tsc --noEmit, test = node --test (schemas), db:tipos gera src/types/database.ts
 - Variáveis: .env.example no repositório; .env.local para dev; .env.homologacao e .env.producao fora do repositório (.gitignore ignora .env*, exceto o exemplo)
 - GitHub: branches main e homologacao; primeiro envio direto em homologacao (exceção única, sem CI ainda); depois sempre feature/* > PR > homologacao > PR > main; tags vX.Y.Z na main
+- Branches protegidas (v0.8.1): main e homologacao exigem PR e o check "Lint e tipos" (o check do banco não é obrigatório porque só roda quando o PR mexe em supabase/); sem aprovação mínima (dev solo); sem force push
 - GitHub (v0.8.1): conta arcenal01, repositório PÚBLICO (escolha do usuário); commits como luizgg4502 <luizgg4502@gmail.com>; GitHub CLI (gh) instalado e logado no PC
 - CI (ci.yml): lint + checagem de tipos em cada PR; banco.yml (opcional): sobe Supabase no GitHub, aplica migrations/seed e roda os testes SQL quando o PR mexe em supabase/
 - Testes SQL usam prefixos próprios (TSB, TST, TSQ, TSC...) para não colidir com o seed
@@ -83,7 +84,6 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 - Biblioteca nova: qrcode.react
 
 ## Pendências
-- Proteger as branches main e homologacao no GitHub (Settings > Branches), opcional, ver docs/06-ambiente-local.md 5.2
 - Leitor de QR (Bloco 12) deve reconhecer etiqueta antiga (endereço substituído) e indicar o código novo
 - Tela de notificações (sino) ainda não existe; as notificações de troca de QR já são gravadas em notificacoes
 - Bloco 8B (itens): bucket de fotos (Storage), lista com busca/filtros, cadastro
@@ -96,10 +96,7 @@ Entrega: sempre em .zip com nome e versão (inventario-robotica-v0.8.1.zip)
 ## Problemas conhecidos
 - v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, 15 testes e build OK (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
 - v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0006 e seed aplicados sem erro; os 7 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
-- v0.6.1: migrations 0001-0004, seed e os 4 arquivos de teste foram executados num Postgres 16 puro com um "esqueleto" do Supabase (roles anon/authenticated/service_role, schema auth e extensions simulados): sem erro de SQL e sem "FALHOU". Isso NÃO substitui o `npm run db:start` real: o auth.users do GoTrue real pode ter colunas diferentes do simulado (o seed é o ponto mais sensível)
 - v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
-- package-lock.json gerado na v0.8.1: commitar junto (o CI usa `npm ci`)
 - Contagem não é "às cegas": alunos podem ler saldos (necessário para a consulta offline)
 - marcar_emprestimo_perdido não tem chave de idempotência: usar só online
 - O seed cria usuários direto em auth.users; se a versão local do Supabase mudar as colunas, ajustar o seed
-- Se já aplicou a 0001 antiga (código com 6 dígitos), rode o comando de correção da resposta do Bloco 3
