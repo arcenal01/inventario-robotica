@@ -1,5 +1,12 @@
 # Modelo de dados: Inventário Robótica
 
+> Atualizado na v0.12.0 (migration 0009, Bloco 12): funções de leitura `posicoes_da_contagem` e `itens_para_contar`
+> (situação de cada posição/item da contagem, sem devolver quantidades); nenhuma tabela nova.
+> Atualizado na v0.8.2 (migration 0008, Bloco 8B): bucket `itens-fotos` no Storage; `itens.foto_url` guarda o CAMINHO no bucket;
+> view `vw_itens_estoque` (saldo total, emprestado, abaixo do mínimo); trigger `proteger_item` (unidade e tipo de controle
+> não mudam depois que há histórico; mínimo inteiro em "un").
+> Atualizado na v0.8.1 (migration 0007): tabela `emprestimo_perdas` (uma linha por perda, imutável, `chave_idempotencia` única);
+> `marcar_emprestimo_perdido` passa a exigir a chave; o cadastro grava `perfis.turma` (opcional) a partir dos metadados.
 > Atualizado na v0.8.1 (migration 0006): código de item com 3 dígitos e contador POR PREFIXO (SEN-001, SEN-002, MOT-001);
 > passa de 999 sem cortar (SEN-1000); o contador fica em `contadores_codigo` com ano = 0; a sequência global foi removida.
 > Atualizado na v0.5.0: `contagens.observacao`; `contagem_itens` ganhou `nao_listado` e `recontagem_pendente`
@@ -89,6 +96,9 @@ Direção do ajuste: destino preenchido = aumentou; origem preenchida = diminuiu
 
 ### emprestimos
 item_id, emprestado_para, registrado_por, endereco_origem_id, quantidade, quantidade_devolvida, quantidade_perdida, emprestado_em, prazo_previsto (opcional), status, baixado_por, observacao, atualizado_em.
+
+### emprestimo_perdas (extra, migration 0007)
+emprestimo_id, quantidade, motivo, registrado_por, chave_idempotencia (único: reenvio offline não duplica), criado_em. Imutável; aluno vê só as dos próprios empréstimos.
 
 ### pedidos
 codigo (PED-2026-0001), solicitante_id, finalidade, projeto_turma, status, aprovado_por, aprovado_em, motivo_rejeicao, chave_idempotencia (único, criação offline), atualizado_em.
