@@ -116,7 +116,7 @@ begin
   exception when others then
     raise notice '14) OK, bloqueou devolução maior que o pendente: %', sqlerrm;
   end;
-  r := public.marcar_emprestimo_perdido(emp, 1, 'quebrou na aula');
+  r := public.marcar_emprestimo_perdido(emp, 1, 'quebrou na aula', gen_random_uuid());  -- chave desde a 0007
   raise notice '15) marcou 1 como perdido: status=% (esperado devolvido)', r->>'status';
   begin
     perform public.devolver(emp, 1, p2, gen_random_uuid());
