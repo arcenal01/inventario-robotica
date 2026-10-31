@@ -1,0 +1,26 @@
+# dependências e build
+node_modules/
+.next/
+out/
+dist/
+coverage/
+*.tsbuildinfo
+
+# segredos: nunca commitar (só o .env.example vai para o GitHub)
+.env
+.env.*
+!.env.example
+
+# Supabase local (arquivos temporários)
+supabase/.temp/
+supabase/.branches/
+
+# backups do banco (Bloco 16)
+backups/
+
+# sistema / editor
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
