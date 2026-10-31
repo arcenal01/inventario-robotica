@@ -27,6 +27,7 @@ npm run dev           # abre o app em http://localhost:3000
 - `docs/10-pedidos.md`: pedidos, aprovação e notificações
 - `docs/11-romaneios.md`: separação, entrega com conferência e PDF
 - `docs/12-contagens.md`: contagem por QR/código, recontagem e aprovação com ajustes
+- `docs/13-painel-relatorios.md`: painel do Início e relatórios em CSV/PDF
 - `PROGRESSO.md`: o que já foi feito, decisões e pendências
 
 ## Branches

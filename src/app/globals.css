@@ -126,21 +126,38 @@
   ::selection {
     background: oklch(0.74 0.15 228 / 0.35);
   }
+}
 
-  /* Impressão (romaneio, etiquetas) sempre em papel branco */
-  @media print {
-    html.dark {
-      color-scheme: light;
-      --background: oklch(1 0 0);
-      --foreground: oklch(0.15 0 0);
-      --card: oklch(1 0 0);
-      --card-foreground: oklch(0.15 0 0);
-      --muted-foreground: oklch(0.35 0 0);
-      --border: oklch(0.8 0 0);
-    }
-    html.dark body {
-      background-image: none;
-    }
+/* Impressão (romaneio, etiquetas, relatórios) sempre em papel branco, mesmo no tema escuro.
+   Fica FORA de @layer para vencer as variáveis do .dark (CSS sem camada tem prioridade). */
+@media print {
+  html,
+  html.dark {
+    color-scheme: light;
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.15 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.15 0 0);
+    --secondary: oklch(0.95 0 0);
+    --secondary-foreground: oklch(0.2 0 0);
+    --muted: oklch(0.95 0 0);
+    --muted-foreground: oklch(0.35 0 0);
+    --accent: oklch(0.95 0 0);
+    --accent-foreground: oklch(0.2 0 0);
+    --border: oklch(0.75 0 0);
+    --input: oklch(0.75 0 0);
+    --color-red-50: oklch(0.97 0.02 25);
+    --color-red-100: oklch(0.94 0.04 25);
+    --color-red-800: oklch(0.45 0.16 25);
+    --color-emerald-50: oklch(0.97 0.02 160);
+    --color-emerald-100: oklch(0.94 0.04 160);
+    --color-emerald-800: oklch(0.42 0.1 160);
+    --color-amber-50: oklch(0.98 0.02 85);
+    --color-amber-100: oklch(0.95 0.05 85);
+    --color-amber-900: oklch(0.42 0.1 60);
+  }
+  html.dark body {
+    background-image: none;
   }
 }
 

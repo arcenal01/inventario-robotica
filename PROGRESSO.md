@@ -1,6 +1,6 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.12.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Versão atual: v0.13.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
 Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
@@ -12,6 +12,8 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
+- Bloco 13 (v0.13.0): painel no Início e relatórios (src/features/relatorios, rotas /relatorios e /relatorios/[tipo], docs/13-painel-relatorios.md, tests/relatorios.test.mjs); sem migration nova
+- Interface nova (feature/ui-tema-escuro, aprovada pelo usuário): tema escuro grafite + azul elétrico padrão, claro opcional, menu lateral com ícones, lucide-react, fonte Geist
 - Bloco 12 (v0.12.0): contagens (0009_contagem_telas.sql, bloco12_testes.sql, src/features/contagens, src/features/leitor, rotas /contagens, /contagens/[id], /contagens/[id]/contar, card no Início, docs/12-contagens.md, tests/contagens.test.mjs); biblioteca nova jsqr
 - Bloco 11 (v0.11.0): romaneios (src/features/romaneios, rotas /romaneios, /romaneios/novo, /romaneios/[id], /romaneios/[id]/imprimir, botão Gerar romaneio no pedido, docs/11-romaneios.md, tests/romaneios.test.mjs); sem migration nova
 - Bloco 10 (v0.10.0): pedidos e notificações (src/features/pedidos, src/features/notificacoes, rotas /pedidos, /pedidos/novo, /pedidos/[id], /pedidos/[id]/editar, /notificacoes, sino no cabeçalho, docs/10-pedidos.md, tests/pedidos.test.mjs); sem migration nova
@@ -71,6 +73,22 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - PDF = página de impressão (/romaneios/[id]/imprimir) + "Salvar como PDF" do navegador (sem biblioteca nova), com assinaturas de quem separou e de quem recebeu
 - O módulo de pedidos não importa o de romaneios: a página do pedido usa PedidoComRomaneio (romaneios/gerar-do-pedido.tsx), que injeta o botão
 - Início: card "Em construção" atualizado
+
+### Interface (aprovada pelo usuário)
+- Tema escuro padrão (classe .dark no <html>, script no <head> evita piscar), claro opcional salvo no aparelho (localStorage "tema")
+- Computador: menu lateral fixo com ícones; celular: barra de baixo com ícones + "Mais"; ícones em src/lib/icones.ts
+- No escuro, as cores de aviso do Tailwind (red/emerald/amber) são remapeadas em globals.css, sem mexer nas telas
+- Impressão SEMPRE em papel branco: bloco @media print fora de @layer (corrigido no Bloco 13; antes saía escuro)
+- Demonstração: toda mudança de visual termina com o app aberto no Chrome do usuário, já logado (pedido do usuário)
+
+### Bloco 13 (painel e relatórios)
+- Sem migration: a RLS das tabelas/views decide o que cada um vê (aluno: só os próprios pedidos e empréstimos)
+- Painel: 4 indicadores (abaixo do mínimo, pedidos, empréstimos com atrasados, contagens) que ficam amarelos quando há pendência; lista dos 5 itens mais críticos; últimas 6 movimentações (equipe) ou meus pedidos (aluno)
+- Relatórios só professor/admin: estoque por endereço, movimentações por período, empréstimos (abertos/atrasados/com perda/todos), divergências por contagem
+- CSV para Excel pt-BR: BOM UTF-8, ";" entre colunas, vírgula decimal, gerado no aparelho (funciona offline depois)
+- PDF = imprimir a própria tela (sem biblioteca), com cabeçalho de emissão; filtros e menus somem na impressão
+- Período em horário de Brasília (início do dia "de" ao fim do dia "até"); período inválido não consulta o banco
+- Limite de 5000 linhas por relatório, com aviso
 
 ### Bloco 12 (contagens)
 - Migration 0009 (aditiva): posicoes_da_contagem e itens_para_contar (security definer, só aprovados, SEM quantidades: o aluno não vê o que os outros contaram)
@@ -153,9 +171,10 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Romaneio: saldo não reservado; se o estoque mudar entre gerar e entregar, a entrega falha e nada é baixado
 
 ## Problemas conhecidos
-- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, testes unitários (54) e build OK; v0.11.0: todas as 25 rotas (v0.12.0) abertas com sessão real (professor e aluno) num `next start`, sem erro de servidor (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
+- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, testes unitários (60) e build OK; v0.11.0: todas as 25 rotas (v0.12.0) abertas com sessão real (professor e aluno) num `next start`, sem erro de servidor (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
 - v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0008 e seed aplicados sem erro (db:reset); os 9 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
 - v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
 - v0.12.0: telas de contagem testadas num Chrome sem janela (cliques reais de professor e 2 alunos, 36 verificações, sem erro no console) e leitor de QR testado com câmera falsa usando a etiqueta gerada pelo app (8 verificações)
+- v0.13.0: painel e relatórios testados no Chrome sem janela (professor e aluno, download real dos CSV, PDF gerado e conferido em papel branco, 27 verificações, sem erro no console)
 - Contagem não é "às cegas": alunos podem ler saldos (necessário para a consulta offline)
 - O seed cria usuários direto em auth.users; se a versão local do Supabase mudar as colunas, ajustar o seed

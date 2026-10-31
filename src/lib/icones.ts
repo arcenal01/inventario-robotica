@@ -10,6 +10,7 @@ import {
   ScanLine,
   Truck,
   Users,
+  FileSpreadsheet,
   type LucideIcon,
 } from "lucide-react";
 
@@ -23,6 +24,7 @@ const ICONES: Record<string, LucideIcon> = {
   "/movimentacoes": History,
   "/enderecos": MapPin,
   "/usuarios": Users,
+  "/relatorios": FileSpreadsheet,
   "/menu": LayoutGrid,
 };
 
