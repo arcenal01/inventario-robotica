@@ -69,6 +69,7 @@ function Pendente({
         <div>
           <p className="font-medium">{usuario.nome}</p>
           <p className="break-all text-sm text-muted-foreground">{usuario.email}</p>
+          {usuario.turma ? <p className="text-sm text-muted-foreground">Turma: {usuario.turma}</p> : null}
           <p className="text-xs text-muted-foreground">Cadastrado em {new Date(usuario.criado_em).toLocaleDateString("pt-BR")}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -126,7 +127,8 @@ export function PainelUsuarios({ eu }: { eu: { id: string; perfil: PapelUsuario 
   const cadastrados = lista.filter(
     (u) =>
       u.status_cadastro !== "pendente" &&
-      (termo === "" || u.nome.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo)),
+      (termo === "" || u.nome.toLowerCase().includes(termo) || u.email.toLowerCase().includes(termo) ||
+        (u.turma ?? "").toLowerCase().includes(termo)),
   );
 
   // Professor só mexe em alunos; admin em todos (menos em si mesmo). O banco confere de novo.
@@ -180,8 +182,8 @@ export function PainelUsuarios({ eu }: { eu: { id: string; perfil: PapelUsuario 
         </h2>
         <Input
           type="search"
-          placeholder="Buscar por nome ou e-mail"
-          aria-label="Buscar por nome ou e-mail"
+          placeholder="Buscar por nome, e-mail ou turma"
+          aria-label="Buscar por nome, e-mail ou turma"
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
         />
@@ -198,6 +200,7 @@ export function PainelUsuarios({ eu }: { eu: { id: string; perfil: PapelUsuario 
                       {u.id === eu.id ? <span className="text-muted-foreground"> (você)</span> : null}
                     </p>
                     <p className="break-all text-sm text-muted-foreground">{u.email}</p>
+                    {u.turma ? <p className="text-sm text-muted-foreground">Turma: {u.turma}</p> : null}
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-1">
                     <Badge>{ROTULO_PAPEL[u.perfil]}</Badge>

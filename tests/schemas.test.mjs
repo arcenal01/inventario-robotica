@@ -45,6 +45,13 @@ test("cadastro: recusa nome curto", () => {
   assert.equal(esquemaCadastro.safeParse({ ...cadastroValido, nome: "Al" }).success, false);
 });
 
+test("cadastro: turma é opcional, sem espaços e vazia vira undefined", () => {
+  assert.equal(esquemaCadastro.parse(cadastroValido).turma, undefined);
+  assert.equal(esquemaCadastro.parse({ ...cadastroValido, turma: "  2º A  " }).turma, "2º A");
+  assert.equal(esquemaCadastro.parse({ ...cadastroValido, turma: "   " }).turma, undefined);
+  assert.equal(esquemaCadastro.safeParse({ ...cadastroValido, turma: "x".repeat(31) }).success, false);
+});
+
 test("usuários: aceita alteração de status e de perfil", () => {
   assert.equal(esquemaAlteracaoPerfil.safeParse({ status_cadastro: "aprovado" }).success, true);
   assert.equal(esquemaAlteracaoPerfil.safeParse({ status_cadastro: "aprovado", perfil: "professor" }).success, true);

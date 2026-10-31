@@ -72,11 +72,11 @@ export default async function PaginaInicio() {
         <CardHeader>
           <CardTitle>Em construção</CardTitle>
           <CardDescription>
-            Itens, movimentações, pedidos, romaneios e contagens chegam nos próximos blocos.
+            Contagens de estoque, painel e relatórios chegam nos próximos blocos.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          Por enquanto o sistema já tem login, aprovação de cadastros, controle de acesso por perfil e endereços com QR Code.
+          Já funcionam: cadastros e aprovação, endereços com QR, itens, movimentações, empréstimos, pedidos e romaneios.
         </CardContent>
       </Card>
     </div>
