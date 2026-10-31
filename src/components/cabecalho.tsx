@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Navegacao } from "@/components/navegacao";
+import { SinoNotificacoes } from "@/features/notificacoes/sino";
 import { itensParaPapel } from "@/lib/navegacao";
 import { ROTULO_PAPEL, type Perfil } from "@/types";
 
@@ -14,6 +15,7 @@ export function Cabecalho({ perfil }: { perfil: Perfil }) {
           <div className="hidden text-right leading-tight sm:block">
             <p className="max-w-40 truncate text-sm font-medium">{perfil.nome}</p>
           </div>
+          <SinoNotificacoes />
           <Badge>{ROTULO_PAPEL[perfil.perfil]}</Badge>
           <form action="/sair" method="post">
             <Button type="submit" variant="ghost" size="sm">

@@ -13,8 +13,14 @@ function ativo(pathname: string, href: string) {
 export function Navegacao({ itens, posicao }: { itens: ItemNavegacao[]; posicao: "topo" | "base" }) {
   const pathname = usePathname();
 
-  const links = itens.map((item) => {
-    const marcado = ativo(pathname, item.href);
+  // No celular só cabem os principais; os outros ficam na página "Mais" (/menu)
+  const visiveis = posicao === "base" ? itens.filter((i) => i.principal) : itens;
+  const temMais = posicao === "base" && visiveis.length < itens.length;
+  const lista = temMais ? [...visiveis, { href: "/menu", rotulo: "Mais", papeis: [] }] : visiveis;
+  const algumOutroMarcado = visiveis.some((i) => ativo(pathname, i.href));
+
+  const links = lista.map((item) => {
+    const marcado = item.href === "/menu" ? !algumOutroMarcado : ativo(pathname, item.href);
     return (
       <Link
         key={item.href}
@@ -45,7 +51,7 @@ export function Navegacao({ itens, posicao }: { itens: ItemNavegacao[]; posicao:
   }
 
   return (
-    <nav aria-label="Menu principal" className="hidden items-center gap-1 md:flex print:hidden">
+    <nav aria-label="Menu principal" className="hidden min-w-0 items-center gap-1 overflow-x-auto md:flex print:hidden">
       {links}
     </nav>
   );
