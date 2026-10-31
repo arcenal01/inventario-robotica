@@ -1,0 +1,37 @@
+name: CI
+
+# Roda em todo Pull Request para homologacao ou main
+on:
+  pull_request:
+    branches: [homologacao, main]
+
+jobs:
+  verificar:
+    name: Lint e tipos
+    runs-on: ubuntu-latest
+    env:
+      # Valores só para o "build" compilar. Não são segredos e não apontam para banco nenhum.
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: chave-falsa-so-para-o-build
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Checagem de tipos
+        run: npm run typecheck
+
+      - name: Testes (schemas)
+        run: npm test
+
+      - name: Build
+        run: npm run build

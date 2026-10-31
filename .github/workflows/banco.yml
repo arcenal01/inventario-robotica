@@ -1,0 +1,40 @@
+name: Banco de dados
+
+# Opcional: sobe o Supabase local no GitHub, aplica as migrations + seed e roda os testes SQL.
+# Só roda quando o PR mexe em supabase/. Se atrapalhar, pode apagar este arquivo.
+on:
+  pull_request:
+    branches: [homologacao, main]
+    paths:
+      - "supabase/**"
+      - ".github/workflows/banco.yml"
+
+jobs:
+  migrations-e-testes:
+    name: Migrations e testes SQL
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Subir Supabase local (aplica migrations e seed)
+        run: supabase start
+
+      - name: Rodar testes SQL
+        shell: bash
+        run: |
+          DB=$(docker ps --filter "name=supabase_db_" --format "{{.Names}}" | head -n1)
+          : > saida.txt
+          for f in supabase/testes/*.sql; do
+            echo "== $f" | tee -a saida.txt
+            docker exec -i -e PGCLIENTENCODING=UTF8 "$DB" \
+              psql -U postgres -d postgres -v ON_ERROR_STOP=1 < "$f" 2>&1 | tee -a saida.txt
+          done
+          if grep -q "FALHOU" saida.txt; then
+            echo "Há verificações com FALHOU"
+            exit 1
+          fi
