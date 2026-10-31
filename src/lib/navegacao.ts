@@ -15,6 +15,7 @@ const EQUIPE: PapelUsuario[] = ["admin", "professor"];
 export const ITENS_NAVEGACAO: ItemNavegacao[] = [
   { href: "/", rotulo: "Início", papeis: TODOS, principal: true },
   { href: "/itens", rotulo: "Itens", papeis: TODOS, principal: true },
+  { href: "/pedidos", rotulo: "Pedidos", papeis: TODOS, principal: true },
   { href: "/emprestimos", rotulo: "Empréstimos", papeis: TODOS, principal: true },
   { href: "/movimentacoes", rotulo: "Movimentações", papeis: EQUIPE },
   { href: "/enderecos", rotulo: "Endereços", papeis: TODOS },

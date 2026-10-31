@@ -24,6 +24,7 @@ npm run dev           # abre o app em http://localhost:3000
 - `docs/08a-enderecos.md`: endereços, QR Code e troca de QR
 - `docs/08b-itens.md`: itens, categorias, fotos e saldos
 - `docs/09-movimentacoes-emprestimos.md`: entradas, saídas, transferências, ajustes e empréstimos
+- `docs/10-pedidos.md`: pedidos, aprovação e notificações
 - `PROGRESSO.md`: o que já foi feito, decisões e pendências
 
 ## Branches
