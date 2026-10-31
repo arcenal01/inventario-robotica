@@ -8,13 +8,17 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { PapelUsuario } from "@/types";
+import { DialogoMovimento } from "@/features/estoque/dialogo-movimento";
 import { useCategorias, useItens, type ItemLista } from "./consultas";
 import { DetalheItem } from "./detalhe-item";
 import { DialogoItem } from "./dialogo-item";
 import { FILTROS_INICIAIS, filtrarItens, formatarQuantidade, ordenarItens, type Filtros } from "./filtros";
 import { urlFoto } from "./foto";
 
-type Janela = { tipo: "detalhe"; item: ItemLista } | { tipo: "editar"; item: ItemLista | null } | null;
+type Janela =
+  | { tipo: "detalhe" | "entrada"; item: ItemLista }
+  | { tipo: "editar"; item: ItemLista | null }
+  | null;
 
 /** Lista de itens com busca e filtros. Professor/admin cadastram e editam; aluno só consulta. */
 export function PainelItens({ papel }: { papel: PapelUsuario }) {
@@ -177,7 +181,19 @@ export function PainelItens({ papel }: { papel: PapelUsuario }) {
           item={janela.item}
           podeEditar={podeEditar}
           aoEditar={() => setJanela({ tipo: "editar", item: janela.item })}
+          aoEntrada={() => setJanela({ tipo: "entrada", item: janela.item })}
           aoFechar={() => setJanela(null)}
+        />
+      ) : null}
+      {janela?.tipo === "entrada" ? (
+        <DialogoMovimento
+          tipo="entrada"
+          itemInicial={janela.item}
+          aoFechar={() => setJanela(null)}
+          aoConcluir={(mensagem) => {
+            setJanela(null);
+            setAviso(mensagem);
+          }}
         />
       ) : null}
       {janela?.tipo === "editar" ? (

@@ -13,11 +13,13 @@ export function DetalheItem({
   item,
   podeEditar,
   aoEditar,
+  aoEntrada,
   aoFechar,
 }: {
   item: ItemLista;
   podeEditar: boolean;
   aoEditar: () => void;
+  aoEntrada: () => void;
   aoFechar: () => void;
 }) {
   const saldosQ = useSaldosDoItem(item.id);
@@ -91,7 +93,7 @@ export function DetalheItem({
             </p>
           ) : null}
           {saldosQ.data && saldosQ.data.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum endereço com saldo. As entradas de estoque chegam no Bloco 9.</p>
+            <p className="text-sm text-muted-foreground">Nenhum endereço com saldo.</p>
           ) : null}
           {saldosQ.data && saldosQ.data.length > 0 ? (
             <ul className="divide-y rounded-md border text-sm">
@@ -110,11 +112,16 @@ export function DetalheItem({
           ) : null}
         </div>
 
-        <div className="flex justify-end gap-2">
+        <div className="flex flex-wrap justify-end gap-2">
           {podeEditar ? (
-            <Button variant="outline" onClick={aoEditar}>
-              Editar
-            </Button>
+            <>
+              <Button variant="outline" onClick={aoEntrada} disabled={item.status !== "ativo"}>
+                Registrar entrada
+              </Button>
+              <Button variant="outline" onClick={aoEditar}>
+                Editar
+              </Button>
+            </>
           ) : null}
           <Button onClick={aoFechar}>Fechar</Button>
         </div>
