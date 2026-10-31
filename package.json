@@ -1,6 +1,6 @@
 {
   "name": "inventario-robotica",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
   "description": "Controle de inventário da sala de robótica (PWA + Supabase)",
   "engines": {
@@ -27,6 +27,7 @@
     "@tanstack/react-query": "^5.62.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "jsqr": "^1.4.0",
     "next": "^15.5.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",

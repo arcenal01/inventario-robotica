@@ -1,5 +1,7 @@
 # Modelo de dados: Inventário Robótica
 
+> Atualizado na v0.12.0 (migration 0009, Bloco 12): funções de leitura `posicoes_da_contagem` e `itens_para_contar`
+> (situação de cada posição/item da contagem, sem devolver quantidades); nenhuma tabela nova.
 > Atualizado na v0.8.2 (migration 0008, Bloco 8B): bucket `itens-fotos` no Storage; `itens.foto_url` guarda o CAMINHO no bucket;
 > view `vw_itens_estoque` (saldo total, emprestado, abaixo do mínimo); trigger `proteger_item` (unidade e tipo de controle
 > não mudam depois que há histórico; mínimo inteiro em "un").

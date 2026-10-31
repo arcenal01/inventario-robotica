@@ -1023,6 +1023,11 @@ isOneToOne: false
 "hoje_br":
 { Args: Record<PropertyKey, never>; Returns: string
                            },
+"itens_para_contar":
+{ Args: { "p_contagem_id": string,"p_endereco_id": string }; Returns: {
+              "codigo": string,"item_id": string,"nome": string,"situacao": string,"unidade": string
+            }[]
+                           },
 "marcar_emprestimo_perdido":
 { Args: { "p_chave_idempotencia": string,"p_emprestimo_id": string,"p_motivo": string,"p_quantidade": number }; Returns: Json
                            },
@@ -1034,6 +1039,11 @@ isOneToOne: false
                            },
 "perfil_atual":
 { Args: Record<PropertyKey, never>; Returns: Database["public"]['Enums']["perfil_usuario"]
+                           },
+"posicoes_da_contagem":
+{ Args: { "p_contagem_id": string }; Returns: {
+              "ativo": boolean,"codigo": string,"contada_por_mim": boolean,"endereco_id": string,"itens_contados": number,"itens_faltando": number,"nome": string,"recontagens": number,"sem_contagem": boolean
+            }[]
                            },
 "registrar_contagem":
 { Args: { "p_chave_idempotencia": string,"p_contagem_id": string,"p_endereco_id": string,"p_itens": Json }; Returns: Json

@@ -17,6 +17,7 @@ export const ITENS_NAVEGACAO: ItemNavegacao[] = [
   { href: "/itens", rotulo: "Itens", papeis: TODOS, principal: true },
   { href: "/pedidos", rotulo: "Pedidos", papeis: TODOS, principal: true },
   { href: "/emprestimos", rotulo: "Empréstimos", papeis: TODOS, principal: true },
+  { href: "/contagens", rotulo: "Contagens", papeis: TODOS },
   { href: "/romaneios", rotulo: "Romaneios", papeis: EQUIPE },
   { href: "/movimentacoes", rotulo: "Movimentações", papeis: EQUIPE },
   { href: "/enderecos", rotulo: "Endereços", papeis: TODOS },

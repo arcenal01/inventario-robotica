@@ -1,6 +1,6 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.11.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Versão atual: v0.12.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
 Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
@@ -12,6 +12,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
+- Bloco 12 (v0.12.0): contagens (0009_contagem_telas.sql, bloco12_testes.sql, src/features/contagens, src/features/leitor, rotas /contagens, /contagens/[id], /contagens/[id]/contar, card no Início, docs/12-contagens.md, tests/contagens.test.mjs); biblioteca nova jsqr
 - Bloco 11 (v0.11.0): romaneios (src/features/romaneios, rotas /romaneios, /romaneios/novo, /romaneios/[id], /romaneios/[id]/imprimir, botão Gerar romaneio no pedido, docs/11-romaneios.md, tests/romaneios.test.mjs); sem migration nova
 - Bloco 10 (v0.10.0): pedidos e notificações (src/features/pedidos, src/features/notificacoes, rotas /pedidos, /pedidos/novo, /pedidos/[id], /pedidos/[id]/editar, /notificacoes, sino no cabeçalho, docs/10-pedidos.md, tests/pedidos.test.mjs); sem migration nova
 - Bloco 9 (v0.9.0): movimentações e empréstimos (src/features/estoque, src/features/emprestimos, rotas /movimentacoes, /emprestimos e /menu, src/lib/chave.ts, datas.ts, erros.ts, docs/09-movimentacoes-emprestimos.md, tests/emprestimos.test.mjs); sem migration nova
@@ -70,6 +71,16 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - PDF = página de impressão (/romaneios/[id]/imprimir) + "Salvar como PDF" do navegador (sem biblioteca nova), com assinaturas de quem separou e de quem recebeu
 - O módulo de pedidos não importa o de romaneios: a página do pedido usa PedidoComRomaneio (romaneios/gerar-do-pedido.tsx), que injeta o botão
 - Início: card "Em construção" atualizado
+
+### Bloco 12 (contagens)
+- Migration 0009 (aditiva): posicoes_da_contagem e itens_para_contar (security definer, só aprovados, SEM quantidades: o aluno não vê o que os outros contaram)
+- Tela de contar NÃO mostra o saldo do sistema; branco = não contei agora (pendente); 0 = procurei e não achei; item achado a mais pela busca (por categoria: só itens da categoria)
+- Uma posição por envio (registrar_contagem), chave de idempotência por posição, reaproveitada em reenvio; resposta "duplicada" vira aviso, nunca silêncio
+- Leitor de QR: jsqr carregado só ao abrir a câmera; câmera traseira; ~6 quadros/s em imagem reduzida; câmera desligada após a leitura; precisa de https/localhost (celular: Bloco 14), senão digitar o código
+- Etiqueta antiga (endereço substituído na troca de QR) é reconhecida e a tela oferece contar o endereço novo (segue a cadeia de trocas) — resolve a pendência do Bloco 8A
+- Encerrar: posições vazias no sistema não geram aviso; posições com material sem contagem ficam como estão (p_forcar automático com confirmação); itens não contados em posição contada viram "não listado"
+- Revisão do professor: última rodada de cada item/posição, filtro "só divergências", recontagem por item; aprovação mostra antes quantos ajustes serão gerados
+- Contagens visíveis para todos os aprovados (menu "Contagens" em Mais); Início mostra card quando há contagem recebendo contagens
 - Toda entrada de estoque exige endereço; saldo só em posições (tipo com armazena_itens = true)
 - Endereços em árvore; tipos_endereco só pelo admin; endereço não muda de pai/tipo (troca de QR = novo endereço + substituido_por_id)
 - Tabelas de negócio sem escrita direta: só funções RPC (security definer)
@@ -134,15 +145,17 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Biblioteca nova: qrcode.react
 
 ## Pendências
-- Leitor de QR (Bloco 12) deve reconhecer etiqueta antiga (endereço substituído) e indicar o código novo
+- Câmera no celular depende do HTTPS do Bloco 14 (no PC em localhost já funciona)
+- Contagem offline: Bloco 15 (a chave de idempotência por posição já está pronta para a fila)
 - Nuvem: se a confirmação de e-mail estiver ligada, o cadastro mostra "confirme seu e-mail" (já tratado na tela)
 - Offline das telas de login/usuários: Blocos 14 e 15
 - HTTPS no celular + proxy para o Supabase local: Bloco 14
 - Romaneio: saldo não reservado; se o estoque mudar entre gerar e entregar, a entrega falha e nada é baixado
 
 ## Problemas conhecidos
-- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, testes unitários (45) e build OK; v0.11.0: todas as 22 rotas abertas com sessão real (professor e aluno) num `next start`, sem erro de servidor (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
+- v0.8.1: Blocos 7 e 8A COMPILADOS no PC do usuário (Windows 11, Node 24.14, npm 11.9): npm install, lint, typecheck, testes unitários (54) e build OK; v0.11.0: todas as 25 rotas (v0.12.0) abertas com sessão real (professor e aluno) num `next start`, sem erro de servidor (Next 15.5.28, React 19.3, supabase-js 2.118, @supabase/ssr 0.12.7). Problema achado e corrigido: @supabase/ssr 0.6.1 é incompatível com os tipos do supabase-js 2.118 (tudo virava `never` no typecheck)
 - v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0008 e seed aplicados sem erro (db:reset); os 9 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
 - v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
+- v0.12.0: telas de contagem testadas num Chrome sem janela (cliques reais de professor e 2 alunos, 36 verificações, sem erro no console) e leitor de QR testado com câmera falsa usando a etiqueta gerada pelo app (8 verificações)
 - Contagem não é "às cegas": alunos podem ler saldos (necessário para a consulta offline)
 - O seed cria usuários direto em auth.users; se a versão local do Supabase mudar as colunas, ajustar o seed
