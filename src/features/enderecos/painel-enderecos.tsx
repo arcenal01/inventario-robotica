@@ -218,7 +218,7 @@ export function PainelEnderecos({ papel }: { papel: PapelUsuario }) {
     return <p className="text-sm text-muted-foreground">Carregando endereços...</p>;
   }
 
-  if (enderecosQ.isError || tiposQ.isError) {
+  if ((enderecosQ.isError && !enderecosQ.data) || (tiposQ.isError && !tiposQ.data)) {
     const mensagem = enderecosQ.error?.message ?? tiposQ.error?.message ?? "erro desconhecido";
     return (
       <div role="alert" className="space-y-3 rounded-md bg-red-50 p-4 text-sm text-red-800">

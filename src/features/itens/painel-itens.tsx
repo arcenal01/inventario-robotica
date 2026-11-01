@@ -37,7 +37,7 @@ export function PainelItens({ papel }: { papel: PapelUsuario }) {
   }
 
   if (itensQ.isPending || categoriasQ.isPending) return <p className="text-sm text-muted-foreground">Carregando itens...</p>;
-  if (itensQ.isError || categoriasQ.isError) {
+  if ((itensQ.isError && !itensQ.data) || (categoriasQ.isError && !categoriasQ.data)) {
     return (
       <p role="alert" className="rounded-md bg-red-50 p-4 text-sm text-red-800">
         Não foi possível carregar os itens: {(itensQ.error ?? categoriasQ.error)?.message}

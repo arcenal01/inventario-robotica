@@ -1028,6 +1028,11 @@ isOneToOne: false
               "codigo": string,"item_id": string,"nome": string,"situacao": string,"unidade": string
             }[]
                            },
+"itens_para_contar_todos":
+{ Args: { "p_contagem_id": string }; Returns: {
+              "codigo": string,"endereco_id": string,"item_id": string,"nome": string,"situacao": string,"unidade": string
+            }[]
+                           },
 "marcar_emprestimo_perdido":
 { Args: { "p_chave_idempotencia": string,"p_emprestimo_id": string,"p_motivo": string,"p_quantidade": number }; Returns: Json
                            },

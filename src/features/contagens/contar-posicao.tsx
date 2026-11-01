@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
@@ -12,12 +12,15 @@ import type { ItemLista } from "@/features/itens/consultas";
 import { SeletorItem } from "@/features/itens/seletor-item";
 import { resolverEndereco } from "@/features/leitor/codigo-endereco";
 import { CampoCodigo } from "@/features/leitor/leitor-qr";
+import { enfileirar, useFila, useOffline } from "@/features/offline/fila";
+import { eFalhaTemporaria, itensNaFila, type EnvioFila } from "@/features/offline/regras";
 import { novaChave } from "@/lib/chave";
 import { traduzirErroBanco } from "@/lib/erros";
 import { criarClienteNavegador } from "@/lib/supabase/client";
 import { useContagem, useItensParaContar, usePosicoesDaContagem, type ItemParaContar } from "./consultas";
 import { podeContarItem, prepararContagem, recebeContagens } from "./regras";
 
+type NovoEnvio = Omit<EnvioFila, "criadoEm" | "estado" | "motivo" | "tentativas">;
 type EtiquetaAntiga = { antigo: string; atual: { id: string; codigo: string }; naContagem: boolean };
 
 /** Mantém o endereço escolhido na URL (recarregar a página não perde a posição), sem ir ao servidor. */
@@ -28,6 +31,7 @@ function marcarNaUrl(contagemId: string, enderecoId: string | null) {
 /**
  * Contar uma posição: lê o QR (ou digita o código) do endereço, mostra os itens esperados SEM a quantidade
  * do sistema e grava tudo de uma vez em registrar_contagem (uma chamada = uma posição, com chave de idempotência).
+ * Sem conexão (Bloco 15A): a posição contada fica guardada na fila do aparelho, com a MESMA chave, e é enviada depois.
  */
 export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: string; enderecoInicial: string | null }) {
   const queryClient = useQueryClient();
@@ -35,6 +39,12 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
   const posicoesQ = usePosicoesDaContagem(contagemId);
   const enderecosQ = useEnderecos();
   const [enderecoId, setEnderecoId] = useState<string | null>(enderecoInicial);
+  // Sem conexão, o service worker entrega a cópia guardada de /contar SEM o ?endereco=: lê da barra de endereço
+  useEffect(() => {
+    if (enderecoInicial) return;
+    const daUrl = new URLSearchParams(window.location.search).get("endereco");
+    if (daUrl) setEnderecoId(daUrl);
+  }, [enderecoInicial]);
   const itensQ = useItensParaContar(contagemId, enderecoId);
   const [valores, setValores] = useState<Record<string, string>>({});
   const [extras, setExtras] = useState<ItemParaContar[]>([]);
@@ -44,16 +54,26 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
   const [erro, setErro] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const { banco, sincronizar } = useOffline();
+  const fila = useFila();
+  const daContagem = fila.filter((e) => e.contagemId === contagemId);
+  const naFila = useMemo(() => itensNaFila(fila, contagemId, enderecoId), [fila, contagemId, enderecoId]);
 
   const posicao = (posicoesQ.data ?? []).find((p) => p.endereco_id === enderecoId) ?? null;
   const itens = useMemo(() => itensQ.data ?? [], [itensQ.data]);
-  const contaveis = useMemo(() => [...itens.filter((i) => podeContarItem(i.situacao)), ...extras], [itens, extras]);
-  const jaContados = itens.filter((i) => !podeContarItem(i.situacao));
+  // itens já guardados na fila deste aparelho não aparecem para contar de novo
+  const contaveis = useMemo(
+    () => [...itens.filter((i) => podeContarItem(i.situacao) && !naFila.has(i.item_id)), ...extras],
+    [itens, extras, naFila],
+  );
+  const jaContados = itens.filter((i) => !podeContarItem(i.situacao) || naFila.has(i.item_id));
   const naLista = useMemo(() => new Set([...itens, ...extras].map((i) => i.item_id)), [itens, extras]);
 
+  if (contagemQ.fetchStatus === "paused" && !contagemQ.data) return <SemDadosGuardados />;
   if (contagemQ.isPending || posicoesQ.isPending) return <p className="text-sm text-muted-foreground">Carregando contagem...</p>;
-  if (contagemQ.isError) return <p className="text-sm text-red-800">Erro: {contagemQ.error.message}</p>;
-  if (posicoesQ.isError) return <p className="text-sm text-red-800">Erro: {posicoesQ.error.message}</p>;
+  // com cópia guardada no aparelho, a tela segue funcionando mesmo se a atualização falhar (sem conexão)
+  if (contagemQ.isError && !contagemQ.data) return <p className="text-sm text-red-800">Erro: {traduzirErroBanco(contagemQ.error.message)}</p>;
+  if (posicoesQ.isError && !posicoesQ.data) return <p className="text-sm text-red-800">Erro: {traduzirErroBanco(posicoesQ.error.message)}</p>;
   const cnt = contagemQ.data;
   if (!cnt) return <p className="text-sm text-muted-foreground">Contagem não encontrada.</p>;
   if (!recebeContagens(cnt.status)) {
@@ -107,12 +127,24 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
     }
     setErrosItem({});
     setEnviando(true);
-    const { data, error } = await criarClienteNavegador().rpc("registrar_contagem", {
+    const envio: NovoEnvio = {
+      chave,
+      tipo: "contagem",
+      contagemId,
+      contagemCodigo: cnt?.codigo ?? "",
+      enderecoId: enderecoId ?? "",
+      enderecoCodigo: posicao?.codigo ?? "",
+      itens: r.itens,
+    };
+    if (!navigator.onLine) return guardarNoAparelho(envio, r.emBranco);
+    const { data, error, status } = await criarClienteNavegador().rpc("registrar_contagem", {
       p_contagem_id: contagemId,
       p_endereco_id: enderecoId ?? "",
       p_itens: r.itens,
       p_chave_idempotencia: chave,
     });
+    // rede caiu ou servidor fora no meio do envio: guarda com a mesma chave (se chegou, o reenvio vira "duplicada")
+    if (error && eFalhaTemporaria(status, error.message)) return guardarNoAparelho(envio, r.emBranco);
     setEnviando(false);
     // Atualiza a lista mesmo com erro: outra pessoa pode ter contado um item desta posição agora há pouco
     await queryClient.invalidateQueries({ queryKey: ["contagens", contagemId] });
@@ -124,6 +156,25 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
       duplicada
         ? `A contagem de ${codigo} já tinha sido registrada (reenvio). Abra a posição de novo para ver o que ainda falta.`
         : `${codigo}: ${r.itens.length} item(ns) registrado(s).${r.emBranco > 0 ? ` ${r.emBranco} ficaram em branco e continuam pendentes.` : ""} Leia a próxima posição.`,
+    );
+  }
+
+  async function guardarNoAparelho(envio: NovoEnvio, emBranco: number) {
+    if (!banco) {
+      setEnviando(false);
+      return setErro("Sem conexão, e este navegador não consegue guardar a contagem. Tente de novo quando a conexão voltar.");
+    }
+    try {
+      await enfileirar(banco, envio);
+    } catch {
+      setEnviando(false);
+      return setErro("Não foi possível guardar a contagem neste aparelho (memória cheia?). Tente de novo com conexão.");
+    }
+    setEnviando(false);
+    escolher(null);
+    setAviso(
+      `${envio.enderecoCodigo}: ${envio.itens.length} item(ns) guardado(s) neste aparelho, sem conexão. Serão enviados sozinhos quando a conexão voltar.` +
+        `${emBranco > 0 ? ` ${emBranco} ficaram em branco e continuam pendentes.` : ""} Leia a próxima posição.`,
     );
   }
 
@@ -156,6 +207,7 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
             {erro}
           </p>
         ) : null}
+        {daContagem.length > 0 ? <GuardadosNoAparelho envios={daContagem} aoEnviar={sincronizar} /> : null}
         <p className="text-xs text-muted-foreground">
           Também dá para tocar na posição na{" "}
           <Link href={`/contagens/${contagemId}`} className="text-primary hover:underline">
@@ -180,8 +232,15 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
         </Button>
       </div>
 
-      {itensQ.isPending ? <p className="text-sm text-muted-foreground">Carregando itens...</p> : null}
-      {itensQ.isError ? <p className="text-sm text-red-800">Erro: {traduzirErroBanco(itensQ.error.message)}</p> : null}
+      {itensQ.isPending && itensQ.fetchStatus === "paused" ? (
+        <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-900">
+          Sem conexão, e os itens desta posição não foram guardados neste aparelho. Abra a contagem uma vez com conexão antes de contar
+          offline.
+        </p>
+      ) : itensQ.isPending ? (
+        <p className="text-sm text-muted-foreground">Carregando itens...</p>
+      ) : null}
+      {itensQ.isError && !itensQ.data ? <p className="text-sm text-red-800">Erro: {traduzirErroBanco(itensQ.error.message)}</p> : null}
 
       {itensQ.data ? (
         <>
@@ -250,7 +309,13 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
                 {jaContados.map((i) => (
                   <li key={i.item_id} className="flex justify-between gap-2 rounded-md border px-3 py-2">
                     <span className="truncate">{i.nome}</span>
-                    <span className="shrink-0 text-xs">{i.situacao === "recontar_outro" ? "você contou: outra pessoa reconta" : "já contado"}</span>
+                    <span className="shrink-0 text-xs">
+                      {naFila.has(i.item_id)
+                        ? "guardado neste aparelho (falta enviar)"
+                        : i.situacao === "recontar_outro"
+                          ? "você contou: outra pessoa reconta"
+                          : "já contado"}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -267,6 +332,57 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
           </Button>
           <p className="text-xs text-muted-foreground">Depois de registrar, só o professor pode pedir recontagem (feita por outra pessoa).</p>
         </>
+      ) : null}
+    </div>
+  );
+}
+
+function SemDadosGuardados() {
+  return (
+    <p className="rounded-md bg-amber-50 p-3 text-sm text-amber-900">
+      Sem conexão, e esta contagem ainda não foi guardada neste aparelho. Abra o app com conexão uma vez (ele guarda as contagens abertas
+      sozinho) e tente de novo.
+    </p>
+  );
+}
+
+/** Posições contadas sem conexão, ainda neste aparelho: aguardando envio ou recusadas pelo servidor (com o motivo). */
+function GuardadosNoAparelho({ envios, aoEnviar }: { envios: EnvioFila[]; aoEnviar: () => Promise<unknown> }) {
+  const [enviando, setEnviando] = useState(false);
+  const pendentes = envios.filter((e) => e.estado === "pendente").length;
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-sm font-medium">Guardadas neste aparelho</p>
+        {pendentes > 0 ? (
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={enviando}
+            onClick={async () => {
+              setEnviando(true);
+              await aoEnviar();
+              setEnviando(false);
+            }}
+          >
+            {enviando ? "Enviando..." : "Enviar agora"}
+          </Button>
+        ) : null}
+      </div>
+      <ul className="space-y-1 text-sm">
+        {envios.map((e) => (
+          <li key={e.chave} className="space-y-1 rounded-md border px-3 py-2">
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-mono font-semibold">{e.enderecoCodigo}</span>
+              {e.estado === "pendente" ? <Badge variant="warning">Aguardando envio</Badge> : <Badge variant="danger">Recusada</Badge>}
+            </div>
+            <p className="text-xs text-muted-foreground">{e.itens.length} item(ns) contado(s)</p>
+            {e.motivo ? <p className="text-xs text-red-800">Motivo: {e.motivo}</p> : null}
+          </li>
+        ))}
+      </ul>
+      {envios.some((e) => e.estado === "recusado") ? (
+        <p className="text-xs text-muted-foreground">Corrigir ou descartar as recusadas chega no Bloco 15B. Por enquanto, avise o professor.</p>
       ) : null}
     </div>
   );

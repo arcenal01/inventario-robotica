@@ -1,6 +1,6 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.14.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Versão atual: v0.15.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
 Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
@@ -12,6 +12,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
+- Bloco 15A (v0.15.0): uso offline com dados no aparelho e fila da contagem (0010_contagem_offline.sql, bloco15_testes.sql, src/features/offline, docs/15a-offline.md, tests/offline.test.mjs); biblioteca nova dexie
 - Bloco 14 (v0.14.0): PWA, cache, HTTPS por túnel e indicador de conexão (public/sw.js, public/offline.html, public/icones/, src/app/manifest.ts, src/components/pwa.tsx, src/components/form-sair.tsx, src/lib/env.ts, next.config.ts, docs/14-pwa-https.md; scripts producao e tunel); sem migration
 - Bloco 13 (v0.13.0): painel no Início e relatórios (src/features/relatorios, rotas /relatorios e /relatorios/[tipo], docs/13-painel-relatorios.md, tests/relatorios.test.mjs); sem migration nova
 - Interface nova (feature/ui-tema-escuro, aprovada pelo usuário): tema escuro grafite + azul elétrico padrão, claro opcional, menu lateral com ícones, lucide-react, fonte Geist
@@ -81,6 +82,19 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - No escuro, as cores de aviso do Tailwind (red/emerald/amber) são remapeadas em globals.css, sem mexer nas telas
 - Impressão SEMPRE em papel branco: bloco @media print fora de @layer (corrigido no Bloco 13; antes saía escuro)
 - Demonstração: toda mudança de visual termina com o app aberto no Chrome do usuário, já logado (pedido do usuário)
+
+### Bloco 15A (dados no aparelho e fila da contagem)
+- Offline só para consulta (itens, saldos, endereços, contagens) e contagem (escolha do usuário); movimentações, empréstimos, pedidos e romaneios continuam online
+- Recusas do servidor ficam guardadas com o motivo (lista de pendências; tela completa de corrigir/descartar no 15B) (escolha do usuário)
+- Cada pessoa usa o próprio celular (escolha do usuário); mesmo assim Sair envia/pergunta e apaga os dados do aparelho
+- Bloco dividido em 15A e 15B (escolha do usuário)
+- Dexie (IndexedDB), um banco por usuário (inventario-<id>); cópia das consultas do TanStack Query + fila + meta; cópias vencem em 30 dias
+- Preparação automática com conexão (ao abrir, a cada 10 min, ao reconectar): itens, categorias, endereços, tipos, saldos de todos os itens e, para contagens recebendo contagens, posições e itens de todas as posições (itens_para_contar_todos, migration 0010 aditiva, sem quantidades)
+- Service worker v0.15.0: mensagem "guardar" baixa as páginas usadas offline e os arquivos /_next/static delas; manifest servido do cache
+- Fila: mesma chave de idempotência; envio em ordem, um por vez (Web Locks), ao reconectar / a cada 20 s / ao voltar ao app / botão "Enviar agora"; falha de rede = tenta depois; recusa do banco = "recusado" com motivo
+- Contar online continua igual; se o envio falha por rede no meio, a posição vai para a fila com a mesma chave
+- Divergência de contagem enviada depois usa o saldo do momento em que chega ao servidor
+- Telas de itens, endereços e contagens mostram a cópia guardada em vez do erro quando a atualização falha
 
 ### Bloco 14 (PWA, cache, HTTPS, conexão)
 - Celulares: Android e iPhone (confirmado pelo usuário); IP do PC pode mudar
@@ -176,7 +190,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 
 ## Pendências
 - Túnel com endereço FIXO: precisa de conta Cloudflare + domínio próprio (decisão do usuário); com o túnel rápido o endereço muda a cada reinício e o app instalado precisa ser reinstalado
-- Contagem offline: Bloco 15 (a chave de idempotência por posição já está pronta para a fila)
+- Bloco 15B: tela de pendências (corrigir/reenviar/descartar contagens recusadas)
 - Nuvem: se a confirmação de e-mail estiver ligada, o cadastro mostra "confirme seu e-mail" (já tratado na tela)
 - Offline das telas de login/usuários: Blocos 14 e 15
 - Romaneio: saldo não reservado; se o estoque mudar entre gerar e entregar, a entrega falha e nada é baixado
@@ -186,6 +200,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0008 e seed aplicados sem erro (db:reset); os 9 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
 - v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
 - v0.12.0: telas de contagem testadas num Chrome sem janela (cliques reais de professor e 2 alunos, 36 verificações, sem erro no console) e leitor de QR testado com câmera falsa usando a etiqueta gerada pelo app (8 verificações)
+- v0.15.0: offline testado no Chrome sem janela com o servidor DESLIGADO de verdade (preparação automática, consulta, contagem na fila, envio sozinho ao religar, idempotência, recusa com motivo, Sair apagando o IndexedDB: 27 verificações); testes dos Blocos 12 (36) e 14 (21) repetidos sem falha. Nenhum celular de verdade testado ainda
 - v0.14.0: PWA testado no Chrome sem janela (service worker, cache, servidor desligado de verdade, página offline, sair limpa cache, 21 verificações) e pelo túnel https real da Cloudflare (login, dados, service worker, logout, 9 verificações); túnel fechado após o teste. Nenhum celular de verdade foi testado ainda
 - v0.13.0: painel e relatórios testados no Chrome sem janela (professor e aluno, download real dos CSV, PDF gerado e conferido em papel branco, 27 verificações, sem erro no console)
 - Contagem não é "às cegas": alunos podem ler saldos (necessário para a consulta offline)
