@@ -71,7 +71,8 @@ export function FormularioCadastro() {
   }
 
   return (
-    <form onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
+    // method="post": se tocarem em Criar conta antes da página carregar (rede lenta/túnel), a senha não vai para o endereço
+    <form method="post" onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
       <Campo id="nome" rotulo="Nome completo" erro={errors.nome?.message}>
         <Input id="nome" autoComplete="name" {...register("nome")} />
       </Campo>

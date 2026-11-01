@@ -2,7 +2,9 @@ import { LogOut } from "lucide-react";
 import Link from "next/link";
 import { BotaoTema } from "@/components/botao-tema";
 import { Marca } from "@/components/marca";
+import { FormSair } from "@/components/form-sair";
 import { Navegacao } from "@/components/navegacao";
+import { IndicadorConexao } from "@/components/pwa";
 import { SinoNotificacoes } from "@/features/notificacoes/sino";
 import { itensParaPapel } from "@/lib/navegacao";
 import { ROTULO_PAPEL, type Perfil } from "@/types";
@@ -25,7 +27,7 @@ function Avatar({ nome }: { nome: string }) {
 
 function BotaoSair({ comTexto = false }: { comTexto?: boolean }) {
   return (
-    <form action="/sair" method="post">
+    <FormSair>
       <button
         type="submit"
         title="Sair"
@@ -35,7 +37,7 @@ function BotaoSair({ comTexto = false }: { comTexto?: boolean }) {
         <LogOut className="h-4 w-4" aria-hidden="true" />
         {comTexto ? <span>Sair</span> : null}
       </button>
-    </form>
+    </FormSair>
   );
 }
 
@@ -76,6 +78,7 @@ export function Cabecalho({ perfil }: { perfil: Perfil }) {
           <Marca />
         </Link>
         <div className="ml-auto flex items-center gap-1">
+          <IndicadorConexao />
           <SinoNotificacoes />
           <BotaoTema className="md:hidden" />
           <span className="ml-1 md:hidden">

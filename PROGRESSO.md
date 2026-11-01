@@ -1,6 +1,6 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.13.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Versão atual: v0.14.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
 Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
@@ -12,6 +12,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
+- Bloco 14 (v0.14.0): PWA, cache, HTTPS por túnel e indicador de conexão (public/sw.js, public/offline.html, public/icones/, src/app/manifest.ts, src/components/pwa.tsx, src/components/form-sair.tsx, src/lib/env.ts, next.config.ts, docs/14-pwa-https.md; scripts producao e tunel); sem migration
 - Bloco 13 (v0.13.0): painel no Início e relatórios (src/features/relatorios, rotas /relatorios e /relatorios/[tipo], docs/13-painel-relatorios.md, tests/relatorios.test.mjs); sem migration nova
 - Interface nova (feature/ui-tema-escuro, aprovada pelo usuário): tema escuro grafite + azul elétrico padrão, claro opcional, menu lateral com ícones, lucide-react, fonte Geist
 - Bloco 12 (v0.12.0): contagens (0009_contagem_telas.sql, bloco12_testes.sql, src/features/contagens, src/features/leitor, rotas /contagens, /contagens/[id], /contagens/[id]/contar, card no Início, docs/12-contagens.md, tests/contagens.test.mjs); biblioteca nova jsqr
@@ -80,6 +81,17 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - No escuro, as cores de aviso do Tailwind (red/emerald/amber) são remapeadas em globals.css, sem mexer nas telas
 - Impressão SEMPRE em papel branco: bloco @media print fora de @layer (corrigido no Bloco 13; antes saía escuro)
 - Demonstração: toda mudança de visual termina com o app aberto no Chrome do usuário, já logado (pedido do usuário)
+
+### Bloco 14 (PWA, cache, HTTPS, conexão)
+- Celulares: Android e iPhone (confirmado pelo usuário); IP do PC pode mudar
+- HTTPS por túnel da Cloudflare (escolha do usuário): cloudflared instalado no PC (winget); `npm run tunel` = túnel rápido (endereço aleatório que muda a cada reinício)
+- Supabase pelo próprio app: NEXT_PUBLIC_SUPABASE_URL=/supabase + SUPABASE_URL_INTERNO; rewrites no next.config; o túnel expõe só a porta 3000 (banco e Studio não)
+- Cookie de sessão com nome fixo (sb-inventario-auth-token): navegador e servidor veem endereços diferentes; todos precisam entrar de novo uma vez
+- Service worker escrito à mão (sem biblioteca): estáticos cache-first; páginas rede-primeiro com cópia guardada; /supabase nunca em cache (dados offline = Bloco 15); só em produção e endereço seguro
+- Página offline em HTML puro (public/offline.html): uma página do Next servida no lugar de outra quebrava ao hidratar
+- Sair apaga as páginas guardadas no aparelho (mensagem ao service worker)
+- Indicador: verde conectado; "Offline" (sem rede) ou "Servidor fora" (rede ok, PC da sala não responde), checando /supabase/auth/v1/health a cada 30 s
+- Correções achadas no teste pelo túnel: /sair redireciona com endereço relativo (antes ia para localhost); formulários de entrar e cadastro com method="post" (antes, se enviados antes de a página carregar, a senha ia no endereço) — mudança pequena em arquivos do Bloco 7, por segurança
 
 ### Bloco 13 (painel e relatórios)
 - Sem migration: a RLS das tabelas/views decide o que cada um vê (aluno: só os próprios pedidos e empréstimos)
@@ -163,11 +175,10 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Biblioteca nova: qrcode.react
 
 ## Pendências
-- Câmera no celular depende do HTTPS do Bloco 14 (no PC em localhost já funciona)
+- Túnel com endereço FIXO: precisa de conta Cloudflare + domínio próprio (decisão do usuário); com o túnel rápido o endereço muda a cada reinício e o app instalado precisa ser reinstalado
 - Contagem offline: Bloco 15 (a chave de idempotência por posição já está pronta para a fila)
 - Nuvem: se a confirmação de e-mail estiver ligada, o cadastro mostra "confirme seu e-mail" (já tratado na tela)
 - Offline das telas de login/usuários: Blocos 14 e 15
-- HTTPS no celular + proxy para o Supabase local: Bloco 14
 - Romaneio: saldo não reservado; se o estoque mudar entre gerar e entregar, a entrega falha e nada é baixado
 
 ## Problemas conhecidos
@@ -175,6 +186,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0008 e seed aplicados sem erro (db:reset); os 9 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
 - v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
 - v0.12.0: telas de contagem testadas num Chrome sem janela (cliques reais de professor e 2 alunos, 36 verificações, sem erro no console) e leitor de QR testado com câmera falsa usando a etiqueta gerada pelo app (8 verificações)
+- v0.14.0: PWA testado no Chrome sem janela (service worker, cache, servidor desligado de verdade, página offline, sair limpa cache, 21 verificações) e pelo túnel https real da Cloudflare (login, dados, service worker, logout, 9 verificações); túnel fechado após o teste. Nenhum celular de verdade foi testado ainda
 - v0.13.0: painel e relatórios testados no Chrome sem janela (professor e aluno, download real dos CSV, PDF gerado e conferido em papel branco, 27 verificações, sem erro no console)
 - Contagem não é "às cegas": alunos podem ler saldos (necessário para a consulta offline)
 - O seed cria usuários direto em auth.users; se a versão local do Supabase mudar as colunas, ajustar o seed

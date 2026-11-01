@@ -12,6 +12,10 @@ const fonteCodigo = Geist_Mono({ subsets: ["latin"], variable: "--fonte-codigo" 
 export const metadata: Metadata = {
   title: { default: "Inventário Robótica", template: "%s | Inventário Robótica" },
   description: "Controle de inventário da sala de eletrônica e robótica.",
+  applicationName: "Inventário Robótica",
+  // iPhone: ícone e barra de status quando o app é adicionado à tela de início
+  appleWebApp: { capable: true, title: "Robótica", statusBarStyle: "black-translucent" },
+  icons: { icon: "/icones/icone-192.png", apple: "/icones/apple-touch-icon.png" },
 };
 
 export const viewport: Viewport = {

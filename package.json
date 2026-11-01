@@ -1,6 +1,6 @@
 {
   "name": "inventario-robotica",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
   "description": "Controle de inventário da sala de robótica (PWA + Supabase)",
   "engines": {
@@ -10,6 +10,8 @@
     "dev": "next dev -H 0.0.0.0",
     "build": "next build",
     "start": "next start -H 0.0.0.0",
+    "producao": "next build && next start -H 0.0.0.0",
+    "tunel": "cloudflared tunnel --no-autoupdate --url http://localhost:3000",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node --test \"tests/**/*.test.mjs\"",
