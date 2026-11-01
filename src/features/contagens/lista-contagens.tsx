@@ -37,7 +37,7 @@ export function ListaContagens({ equipe }: { equipe: boolean }) {
       </div>
 
       {contagensQ.isPending ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
-      {contagensQ.isError ? <p className="text-sm text-red-800">Erro: {contagensQ.error.message}</p> : null}
+      {contagensQ.isError && !contagensQ.data ? <p className="text-sm text-red-800">Erro: {contagensQ.error.message}</p> : null}
       {contagensQ.data && lista.length === 0 ? <p className="text-sm text-muted-foreground">Nenhuma contagem.</p> : null}
 
       <ul className="space-y-2">

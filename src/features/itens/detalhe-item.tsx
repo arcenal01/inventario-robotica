@@ -87,7 +87,7 @@ export function DetalheItem({
         <div className="space-y-1">
           <h3 className="text-sm font-semibold">Onde está guardado</h3>
           {saldosQ.isPending ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
-          {saldosQ.isError ? (
+          {saldosQ.isError && !saldosQ.data ? (
             <p role="alert" className="text-sm text-red-800">
               Não foi possível carregar os endereços: {saldosQ.error.message}
             </p>

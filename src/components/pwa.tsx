@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { CloudOff, ServerCrash } from "lucide-react";
+import { useOffline } from "@/features/offline/fila";
+import { descreverAtualizacao } from "@/features/offline/regras";
 import { env, urlSupabaseNavegador } from "@/lib/env";
 import { cn } from "@/lib/utils";
 
@@ -71,7 +73,7 @@ export function useConexao(): EstadoConexao {
 const TEXTO: Record<Exclude<EstadoConexao, "online">, { curto: string; longo: string }> = {
   sem_internet: {
     curto: "Offline",
-    longo: "Sem conexão. Você vê o que já estava carregado; nada novo é salvo até a conexão voltar.",
+    longo: "Sem conexão.",
   },
   servidor_fora: {
     curto: "Servidor fora",
@@ -82,6 +84,7 @@ const TEXTO: Record<Exclude<EstadoConexao, "online">, { curto: string; longo: st
 /** Faixa de aviso logo abaixo do topo (some quando está tudo online). */
 export function AvisoConexao() {
   const estado = useConexao();
+  const { preparadoEm } = useOffline();
   if (estado === "online") return null;
   const Icone = estado === "sem_internet" ? CloudOff : ServerCrash;
   return (
@@ -89,7 +92,9 @@ export function AvisoConexao() {
       <p className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2 text-sm md:px-8">
         <Icone className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span>
-          <span className="font-semibold">{TEXTO[estado].curto}.</span> {TEXTO[estado].longo}
+          <span className="font-semibold">{TEXTO[estado].curto}.</span> {TEXTO[estado].longo} Itens, endereços e contagens
+          {preparadoEm ? ` mostram os dados guardados neste aparelho (${descreverAtualizacao(preparadoEm)})` : " mostram só o que já estava carregado"}; contagens
+          ficam guardadas e são enviadas quando a conexão voltar. O resto do app precisa de conexão.
         </span>
       </p>
     </div>

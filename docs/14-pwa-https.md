@@ -22,7 +22,7 @@ SUPABASE_URL_INTERNO=http://127.0.0.1:54321
 - O que ele guarda:
   - arquivos do app (`/_next/static`, ícones): na primeira visita;
   - páginas: busca na rede; sem rede/servidor, mostra a última versão guardada; se a tela nunca foi aberta, mostra `offline.html`;
-  - dados (`/supabase/...`): **nunca** guardados aqui. Dados offline e fila de envio = Bloco 15.
+  - dados (`/supabase/...`): **nunca** guardados aqui. Dados offline e fila de envio: IndexedDB, ver docs/15a-offline.md.
 - Ao **Sair**, as páginas guardadas no aparelho são apagadas.
 - Versão nova do app: aumente `VERSAO` em `public/sw.js` (apaga os caches antigos).
 

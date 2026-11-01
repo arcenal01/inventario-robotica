@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { criarClienteNavegador } from "@/lib/supabase/client";
 import type { EscopoContagem, PosicaoContagem, SituacaoItem, StatusContagem } from "./regras";
 
@@ -26,23 +26,25 @@ const CAMPOS_CONTAGEM = `id, codigo, escopo, categoria_id, status, observacao, c
   aprovadaPor:perfis!contagens_aprovada_por_fkey(nome)`;
 
 /** Todas as contagens (todos os aprovados veem). Mais recentes primeiro. */
+export const consultaContagens = queryOptions({
+  queryKey: ["contagens"],
+  queryFn: async (): Promise<Contagem[]> => {
+    const { data, error } = await criarClienteNavegador()
+      .from("contagens")
+      .select(CAMPOS_CONTAGEM)
+      .order("criado_em", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+});
+
 export function useContagens() {
-  return useQuery({
-    queryKey: ["contagens"],
-    queryFn: async (): Promise<Contagem[]> => {
-      const { data, error } = await criarClienteNavegador()
-        .from("contagens")
-        .select(CAMPOS_CONTAGEM)
-        .order("criado_em", { ascending: false })
-        .limit(100);
-      if (error) throw new Error(error.message);
-      return data ?? [];
-    },
-  });
+  return useQuery(consultaContagens);
 }
 
-export function useContagem(id: string) {
-  return useQuery({
+export function consultaContagem(id: string) {
+  return queryOptions({
     queryKey: ["contagens", id],
     queryFn: async (): Promise<Contagem | null> => {
       const { data, error } = await criarClienteNavegador().from("contagens").select(CAMPOS_CONTAGEM).eq("id", id).maybeSingle();
@@ -52,9 +54,13 @@ export function useContagem(id: string) {
   });
 }
 
+export function useContagem(id: string) {
+  return useQuery(consultaContagem(id));
+}
+
 /** Posições da contagem e a situação de cada uma (função do banco, sem quantidades). */
-export function usePosicoesDaContagem(id: string) {
-  return useQuery({
+export function consultaPosicoes(id: string) {
+  return queryOptions({
     queryKey: ["contagens", id, "posicoes"],
     queryFn: async (): Promise<PosicaoContagem[]> => {
       const { data, error } = await criarClienteNavegador().rpc("posicoes_da_contagem", { p_contagem_id: id });
@@ -64,11 +70,20 @@ export function usePosicoesDaContagem(id: string) {
   });
 }
 
+export function usePosicoesDaContagem(id: string) {
+  return useQuery(consultaPosicoes(id));
+}
+
 export type ItemParaContar = { item_id: string; codigo: string; nome: string; unidade: string; situacao: SituacaoItem };
+
+/** Chave da lista de itens de UMA posição (a preparação offline preenche a mesma chave). */
+export function chaveItensParaContar(contagemId: string, enderecoId: string | null) {
+  return ["contagens", contagemId, "itens", enderecoId] as const;
+}
 
 export function useItensParaContar(contagemId: string, enderecoId: string | null) {
   return useQuery({
-    queryKey: ["contagens", contagemId, "itens", enderecoId],
+    queryKey: chaveItensParaContar(contagemId, enderecoId),
     enabled: enderecoId !== null,
     queryFn: async (): Promise<ItemParaContar[]> => {
       const { data, error } = await criarClienteNavegador().rpc("itens_para_contar", {
@@ -79,6 +94,17 @@ export function useItensParaContar(contagemId: string, enderecoId: string | null
       return (data ?? []).map((l) => ({ ...l, situacao: l.situacao as SituacaoItem }));
     },
   });
+}
+
+/** Itens de TODAS as posições numa chamada (0010), separados por posição. Usado para contar offline. */
+export async function carregarItensParaContarTodos(contagemId: string): Promise<Map<string, ItemParaContar[]>> {
+  const { data, error } = await criarClienteNavegador().rpc("itens_para_contar_todos", { p_contagem_id: contagemId });
+  if (error) throw new Error(error.message);
+  const porPosicao = new Map<string, ItemParaContar[]>();
+  for (const { endereco_id, ...l } of data ?? []) {
+    porPosicao.set(endereco_id, [...(porPosicao.get(endereco_id) ?? []), { ...l, situacao: l.situacao as SituacaoItem }]);
+  }
+  return porPosicao;
 }
 
 export type LinhaContagem = {

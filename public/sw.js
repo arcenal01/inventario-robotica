@@ -1,10 +1,11 @@
-// Service worker do Inventário Robótica (Bloco 14).
+// Service worker do Inventário Robótica (Blocos 14 e 15A).
 // - Arquivos do app (/_next/static, ícones): guardados no aparelho na primeira visita (cache primeiro).
 // - Páginas: busca na rede; sem rede, mostra a última versão guardada ou a página /offline.
-// - Dados do Supabase (/supabase/...): sempre pela rede. Consulta e fila offline de dados = Bloco 15 (IndexedDB).
+// - Dados do Supabase (/supabase/...): sempre pela rede. A cópia dos dados e a fila offline ficam no IndexedDB (Bloco 15A).
+// - Mensagem {tipo: "guardar", urls}: o app pede para guardar já as telas usadas offline (e os arquivos delas).
 // Ao publicar uma versão nova do app, aumente VERSAO para apagar os caches antigos.
 
-const VERSAO = "v0.14.0";
+const VERSAO = "v0.15.0";
 const ESTATICOS = `estaticos-${VERSAO}`;
 const PAGINAS = `paginas-${VERSAO}`;
 const OFFLINE = "/offline.html";
@@ -27,10 +28,34 @@ self.addEventListener("activate", (evento) => {
   );
 });
 
-// Ao sair do app, apaga as páginas guardadas (podem ter dados da pessoa)
+// Ao sair do app, apaga as páginas guardadas (podem ter dados da pessoa).
+// "guardar": baixa as páginas pedidas (com a sessão da pessoa) e os arquivos /_next/static que elas usam.
 self.addEventListener("message", (evento) => {
   if (evento.data === "sair") evento.waitUntil(caches.delete(PAGINAS));
+  else if (evento.data?.tipo === "guardar" && Array.isArray(evento.data.urls)) evento.waitUntil(guardarPaginas(evento.data.urls));
 });
+
+async function guardarPaginas(urls) {
+  const paginas = await caches.open(PAGINAS);
+  const estaticos = await caches.open(ESTATICOS);
+  for (const url of urls) {
+    if (typeof url !== "string" || !url.startsWith("/") || url.startsWith("//")) continue; // só telas deste app
+    try {
+      const resposta = await fetch(url, { credentials: "same-origin" });
+      if (!resposta.ok || resposta.redirected) continue;
+      const html = await resposta.clone().text();
+      await paginas.put(url, resposta);
+      const arquivos = new Set(html.match(/\/_next\/static\/[^"'\s\\]+/g) ?? []);
+      for (const arquivo of arquivos) {
+        if (await estaticos.match(arquivo)) continue;
+        const r = await fetch(arquivo);
+        if (r.ok) await estaticos.put(arquivo, r);
+      }
+    } catch {
+      // sem conexão: tenta de novo na próxima preparação
+    }
+  }
+}
 
 async function cachePrimeiro(pedido) {
   const guardado = await caches.match(pedido);
@@ -58,7 +83,7 @@ self.addEventListener("fetch", (evento) => {
   if (url.origin !== self.location.origin) return;
   if (url.pathname.startsWith("/supabase/")) return; // dados: sempre pela rede
 
-  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icones/")) {
+  if (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icones/") || url.pathname === "/manifest.webmanifest") {
     evento.respondWith(cachePrimeiro(pedido));
     return;
   }

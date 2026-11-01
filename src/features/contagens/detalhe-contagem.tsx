@@ -115,7 +115,7 @@ export function DetalheContagem({ id, equipe }: { id: string; equipe: boolean })
   );
 
   if (contagemQ.isPending) return <p className="text-sm text-muted-foreground">Carregando contagem...</p>;
-  if (contagemQ.isError) return <p className="text-sm text-red-800">Erro: {contagemQ.error.message}</p>;
+  if (contagemQ.isError && !contagemQ.data) return <p className="text-sm text-red-800">Erro: {contagemQ.error.message}</p>;
   const cnt = contagemQ.data;
   if (!cnt) return <p className="text-sm text-muted-foreground">Contagem não encontrada.</p>;
 
@@ -206,7 +206,7 @@ export function DetalheContagem({ id, equipe }: { id: string; equipe: boolean })
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">Posições</h2>
           {posicoesQ.isPending ? <p className="text-sm text-muted-foreground">Carregando posições...</p> : null}
-          {posicoesQ.isError ? <p className="text-sm text-red-800">Erro: {posicoesQ.error.message}</p> : null}
+          {posicoesQ.isError && !posicoesQ.data ? <p className="text-sm text-red-800">Erro: {posicoesQ.error.message}</p> : null}
           {posicoesQ.data ? (
             <p className="text-sm">
               <span className="font-semibold">{resumo.contadas}</span> contada(s) · {resumo.faltam} faltando
@@ -285,7 +285,7 @@ export function DetalheContagem({ id, equipe }: { id: string; equipe: boolean })
         <section className="space-y-2">
           <h2 className="text-lg font-semibold">{cnt.status === "em_revisao" ? "Revisão" : "Resultado"}</h2>
           {linhasQ.isPending ? <p className="text-sm text-muted-foreground">Carregando linhas...</p> : null}
-          {linhasQ.isError ? <p className="text-sm text-red-800">Erro: {linhasQ.error.message}</p> : null}
+          {linhasQ.isError && !linhasQ.data ? <p className="text-sm text-red-800">Erro: {linhasQ.error.message}</p> : null}
           {linhasQ.data ? (
             <p className="text-sm">
               {atuais.length} linha(s) contada(s) · {atuais.filter((l) => l.divergencia !== 0).length} com divergência

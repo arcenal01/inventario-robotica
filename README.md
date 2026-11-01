@@ -29,6 +29,7 @@ npm run dev           # abre o app em http://localhost:3000
 - `docs/12-contagens.md`: contagem por QR/código, recontagem e aprovação com ajustes
 - `docs/13-painel-relatorios.md`: painel do Início e relatórios em CSV/PDF
 - `docs/14-pwa-https.md`: instalar como app, cache, indicador de conexão e túnel https
+- `docs/15a-offline.md`: dados guardados no aparelho, consulta e contagem sem conexão, fila de envio
 - `PROGRESSO.md`: o que já foi feito, decisões e pendências
 
 ## Branches
