@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
-import { env } from "@/lib/env";
+import { COOKIE_SESSAO, env, urlSupabaseServidor } from "@/lib/env";
 import type { Database } from "@/types/database";
 
 /** Páginas que podem ser abertas sem login. */
@@ -25,7 +25,8 @@ function redirecionar(request: NextRequest, resposta: NextResponse, caminho: str
 export async function atualizarSessao(request: NextRequest) {
   let resposta = NextResponse.next({ request });
 
-  const supabase = createServerClient<Database>(env.NEXT_PUBLIC_SUPABASE_URL, env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+  const supabase = createServerClient<Database>(urlSupabaseServidor(), env.NEXT_PUBLIC_SUPABASE_ANON_KEY, {
+    cookieOptions: COOKIE_SESSAO,
     cookies: {
       getAll() {
         return request.cookies.getAll();

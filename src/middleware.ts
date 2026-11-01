@@ -6,6 +6,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Tudo, exceto arquivos estáticos. (Bloco 14 acrescenta manifest e service worker aqui.)
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icons/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  // Tudo, exceto arquivos estáticos, o PWA (manifest, service worker, ícones, página offline)
+  // e /supabase (o próprio Supabase confere a sessão nas chamadas repassadas).
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|icones/|offline.html|supabase/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };

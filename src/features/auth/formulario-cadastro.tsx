@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Campo } from "@/components/ui/campo";
 import { Input } from "@/components/ui/input";
 import { criarClienteNavegador } from "@/lib/supabase/client";
-import { esquemaCadastro, type DadosCadastro } from "./schemas";
+import { esquemaCadastro, type DadosCadastro, type EntradaCadastro } from "./schemas";
 import { traduzirErroAuth } from "./mensagens-erro";
 
 export function FormularioCadastro() {
@@ -20,21 +20,21 @@ export function FormularioCadastro() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<DadosCadastro>({
+  } = useForm<EntradaCadastro, unknown, DadosCadastro>({
     resolver: zodResolver(esquemaCadastro),
-    defaultValues: { nome: "", email: "", senha: "", confirmarSenha: "" },
+    defaultValues: { nome: "", email: "", turma: "", senha: "", confirmarSenha: "" },
   });
 
   async function aoEnviar(dados: DadosCadastro) {
     setErro(null);
     try {
       const supabase = criarClienteNavegador();
-      // O nome vai nos metadados; o banco cria o perfil (aluno, pendente) por trigger.
+      // Nome e turma vão nos metadados; o banco cria o perfil (aluno, pendente) por trigger.
       // Ninguém consegue se cadastrar como professor/admin por aqui.
       const { data, error } = await supabase.auth.signUp({
         email: dados.email,
         password: dados.senha,
-        options: { data: { nome: dados.nome } },
+        options: { data: { nome: dados.nome, turma: dados.turma } },
       });
       if (error) {
         setErro(traduzirErroAuth(error.message));
@@ -71,12 +71,16 @@ export function FormularioCadastro() {
   }
 
   return (
-    <form onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
+    // method="post": se tocarem em Criar conta antes da página carregar (rede lenta/túnel), a senha não vai para o endereço
+    <form method="post" onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
       <Campo id="nome" rotulo="Nome completo" erro={errors.nome?.message}>
         <Input id="nome" autoComplete="name" {...register("nome")} />
       </Campo>
       <Campo id="email" rotulo="E-mail" erro={errors.email?.message}>
         <Input id="email" type="email" autoComplete="email" inputMode="email" {...register("email")} />
+      </Campo>
+      <Campo id="turma" rotulo="Turma (opcional, ex.: 2º A)" erro={errors.turma?.message}>
+        <Input id="turma" autoComplete="off" {...register("turma")} />
       </Campo>
       <Campo id="senha" rotulo="Senha (mínimo 8 caracteres)" erro={errors.senha?.message}>
         <Input id="senha" type="password" autoComplete="new-password" {...register("senha")} />
