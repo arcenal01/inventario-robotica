@@ -1,6 +1,6 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.15.1 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Versão atual: v0.15.2 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
 Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
@@ -12,6 +12,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
+- Polimento de interface (v0.15.2, pedido do usuário: skill emil-design-eng): movimento e toque (globals.css, componentes ui, menu, cabeçalho, avisos)
 - Bloco 15B (v0.15.1): tela de Pendências para corrigir/reenviar/descartar contagens recusadas (rota /pendencias, src/features/offline/painel-pendencias.tsx, seção 7 de docs/15a-offline.md); sem migration
 - Bloco 15A (v0.15.0): uso offline com dados no aparelho e fila da contagem (0010_contagem_offline.sql, bloco15_testes.sql, src/features/offline, docs/15a-offline.md, tests/offline.test.mjs); biblioteca nova dexie
 - Bloco 14 (v0.14.0): PWA, cache, HTTPS por túnel e indicador de conexão (public/sw.js, public/offline.html, public/icones/, src/app/manifest.ts, src/components/pwa.tsx, src/components/form-sair.tsx, src/lib/env.ts, next.config.ts, docs/14-pwa-https.md; scripts producao e tunel); sem migration
@@ -83,6 +84,10 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - No escuro, as cores de aviso do Tailwind (red/emerald/amber) são remapeadas em globals.css, sem mexer nas telas
 - Impressão SEMPRE em papel branco: bloco @media print fora de @layer (corrigido no Bloco 13; antes saía escuro)
 - Demonstração: toda mudança de visual termina com o app aberto no Chrome do usuário, já logado (pedido do usuário)
+- Movimento (v0.15.2, skill emil-design-eng): curva forte --ease-saida cubic-bezier(0.23, 1, 0.32, 1); utilidades pressionar (scale 0.97 ao tocar, 160 ms) e pressionar-suave (0.985, cartões); surgir (avisos entram com 4 px + esmaecer, 200 ms, via @starting-style); janela entra de 96% a 100% centralizada; saídas instantâneas; nada de transition: all
+- Sem animação em ação repetida (digitar, trocar de aba); troca de tema sem transição (classe trocando-tema)
+- "Reduzir movimento" do aparelho respeitado: só esmaecer, sem escala/deslize (o PC do usuário está assim: efeitos de animação do Windows desligados)
+- Celular: touch-action manipulation (toque sem espera), :active funcionando no iPhone (escuta de touchstart), viewport-fit=cover (barra de baixo acima da barra de gestos no app instalado); hover só em aparelho com mouse (padrão do Tailwind 4)
 
 ### Bloco 15B (pendências)
 - /pendencias para todos os aprovados, fora do menu (as faixas de aviso e a tela de contar levam até ela); funciona offline
@@ -205,6 +210,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0008 e seed aplicados sem erro (db:reset); os 9 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
 - v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
 - v0.12.0: telas de contagem testadas num Chrome sem janela (cliques reais de professor e 2 alunos, 36 verificações, sem erro no console) e leitor de QR testado com câmera falsa usando a etiqueta gerada pelo app (8 verificações)
+- v0.15.2: polimento testado no Chrome sem janela (curvas, toque, janela nos dois modos de movimento, tema, viewport: 10 verificações); 14, 15A e 15B repetidos sem falha; nos testes dos Blocos 12 e 13 falham só os passos que dependem da caixa movida (uma rodada de teste interrompida já tinha movido a caixa no banco local; dado, não código)
 - v0.15.1: Pendências testada no Chrome sem janela com conflito real (aluno 1 offline x aluno 2 online no mesmo item), tela offline, correção, reenvio e descarte: 23 verificações; teste do 15A repetido (27)
 - v0.15.0: offline testado no Chrome sem janela com o servidor DESLIGADO de verdade (preparação automática, consulta, contagem na fila, envio sozinho ao religar, idempotência, recusa com motivo, Sair apagando o IndexedDB: 27 verificações); testes dos Blocos 12 (36) e 14 (21) repetidos sem falha. Nenhum celular de verdade testado ainda
 - v0.14.0: PWA testado no Chrome sem janela (service worker, cache, servidor desligado de verdade, página offline, sair limpa cache, 21 verificações) e pelo túnel https real da Cloudflare (login, dados, service worker, logout, 9 verificações); túnel fechado após o teste. Nenhum celular de verdade foi testado ainda

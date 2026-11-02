@@ -78,7 +78,7 @@ export function PainelPendencias() {
       {mensagem ? (
         <p
           role={mensagem.tipo === "erro" ? "alert" : "status"}
-          className={cn("rounded-md p-3 text-sm", mensagem.tipo === "erro" ? "bg-amber-50 text-amber-900" : "bg-emerald-50 text-emerald-900")}
+          className={cn("surgir rounded-md p-3 text-sm", mensagem.tipo === "erro" ? "bg-amber-50 text-amber-900" : "bg-emerald-50 text-emerald-900")}
         >
           {mensagem.texto}
         </p>

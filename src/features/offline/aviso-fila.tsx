@@ -28,7 +28,7 @@ export function AvisoFila() {
   return (
     <div className="print:hidden">
       {pendentes > 0 ? (
-        <div role="status" className="border-b border-primary/30 bg-primary/10 text-foreground">
+        <div role="status" className="surgir border-b border-primary/30 bg-primary/10 text-foreground">
           <p className="mx-auto flex max-w-5xl flex-wrap items-center gap-2 px-4 py-2 text-sm md:px-8">
             <CloudUpload className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="flex-1">
@@ -54,7 +54,7 @@ export function AvisoFila() {
         </div>
       ) : null}
       {recusado ? (
-        <div role="alert" className="border-b border-red-300/40 bg-red-50 text-red-800">
+        <div role="alert" className="surgir border-b border-red-300/40 bg-red-50 text-red-800">
           <p className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2 text-sm md:px-8">
             <CircleAlert className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>
@@ -69,7 +69,7 @@ export function AvisoFila() {
         </div>
       ) : null}
       {mostrarEnvio && ultimoEnvio && pendentes === 0 ? (
-        <div role="status" className="border-b border-emerald-300/40 bg-emerald-50 text-emerald-900">
+        <div role="status" className="surgir border-b border-emerald-300/40 bg-emerald-50 text-emerald-900">
           <p className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2 text-sm md:px-8">
             <CheckCircle2 className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>

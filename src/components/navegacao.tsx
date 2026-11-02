@@ -26,7 +26,7 @@ export function Navegacao({ itens, posicao }: { itens: ItemNavegacao[]; posicao:
               href={item.href}
               aria-current={marcado ? "page" : undefined}
               className={cn(
-                "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition-colors",
+                "group relative flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium pressionar",
                 marcado ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-secondary hover:text-foreground",
               )}
             >
@@ -60,7 +60,7 @@ export function Navegacao({ itens, posicao }: { itens: ItemNavegacao[]; posicao:
             href={item.href}
             aria-current={marcado ? "page" : undefined}
             className={cn(
-              "flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
+              "flex h-16 flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium pressionar",
               marcado ? "text-primary" : "text-muted-foreground hover:text-foreground",
             )}
           >

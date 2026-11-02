@@ -21,7 +21,7 @@ export default async function PaginaMenu() {
           return (
             <li key={item.href}>
               <Link href={item.href} className="group block">
-                <Card className="flex items-center gap-3 p-4 transition-colors group-hover:border-primary/50 group-hover:bg-accent">
+                <Card className="flex items-center gap-3 p-4 pressionar-suave group-hover:border-primary/50 group-hover:bg-accent">
                   <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-accent text-primary">
                     <Icone className="h-5 w-5" aria-hidden="true" />
                   </span>

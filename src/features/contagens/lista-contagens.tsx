@@ -44,7 +44,7 @@ export function ListaContagens({ equipe }: { equipe: boolean }) {
         {lista.map((c) => (
           <li key={c.id}>
             <Link href={`/contagens/${c.id}`} className="block">
-              <Card className="transition-colors hover:bg-accent">
+              <Card className="pressionar-suave hover:bg-accent">
                 <CardContent className="space-y-1 p-4 sm:p-4">
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-mono font-semibold">{c.codigo}</span>

@@ -11,7 +11,7 @@ export function SinoNotificacoes() {
     <Link
       href="/notificacoes"
       aria-label={n > 0 ? `Notificações: ${n} não lida(s)` : "Notificações"}
-      className="relative inline-flex h-9 w-9 items-center justify-center rounded-md hover:bg-accent"
+      className="relative inline-flex h-9 w-9 items-center justify-center rounded-md pressionar hover:bg-accent"
     >
       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2">
         <path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9" strokeLinecap="round" strokeLinejoin="round" />

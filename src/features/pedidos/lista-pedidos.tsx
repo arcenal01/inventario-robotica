@@ -97,7 +97,7 @@ export function ListaPedidos({ usuarioId, equipe }: { usuarioId: string; equipe:
         {lista.map((p) => (
           <li key={p.id}>
             <Link href={`/pedidos/${p.id}`} className="block">
-              <Card className="transition-colors hover:bg-accent">
+              <Card className="pressionar-suave hover:bg-accent">
                 <CardContent className="space-y-1 p-4 sm:p-4">
                   <div className="flex items-start justify-between gap-2">
                     <span className="font-mono font-semibold">{p.codigo}</span>

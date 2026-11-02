@@ -182,13 +182,13 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
     return (
       <div className="space-y-4">
         {aviso ? (
-          <p role="status" className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
+          <p role="status" className="surgir rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
             {aviso}
           </p>
         ) : null}
         <CampoCodigo id="codigo-posicao" rotulo="Código da posição" exemplo="ARM01-GAV01-P01" aoConfirmar={aoCodigo} />
         {etiquetaAntiga ? (
-          <div role="alert" className="space-y-2 rounded-md bg-amber-50 p-3 text-sm text-amber-900">
+          <div role="alert" className="surgir space-y-2 rounded-md bg-amber-50 p-3 text-sm text-amber-900">
             <p>
               Etiqueta antiga: <span className="font-mono font-semibold">{etiquetaAntiga.antigo}</span> foi trocado por{" "}
               <span className="font-mono font-semibold">{etiquetaAntiga.atual.codigo}</span>. Avise o professor para trocar a etiqueta.
@@ -203,7 +203,7 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
           </div>
         ) : null}
         {erro ? (
-          <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+          <p role="alert" className="surgir rounded-md bg-red-50 p-3 text-sm text-red-800">
             {erro}
           </p>
         ) : null}
@@ -323,7 +323,7 @@ export function ContarPosicao({ contagemId, enderecoInicial }: { contagemId: str
           ) : null}
 
           {erro ? (
-            <p role="alert" className="rounded-md bg-red-50 p-3 text-sm text-red-800">
+            <p role="alert" className="surgir rounded-md bg-red-50 p-3 text-sm text-red-800">
               {erro}
             </p>
           ) : null}

@@ -224,7 +224,7 @@ export function DetalheContagem({ id, equipe }: { id: string; equipe: boolean })
                 {g.posicoes.map((p) => {
                   const s = situacaoPosicao(p);
                   const conteudo = (
-                    <Card className={cn(recebendo && "transition-colors hover:bg-accent")}>
+                    <Card className={cn(recebendo && "pressionar-suave hover:bg-accent")}>
                       <CardContent className="flex items-center justify-between gap-2 p-3 sm:p-3">
                         <span className="min-w-0">
                           <span className="block font-mono text-sm font-semibold">{p.codigo}</span>

@@ -7,7 +7,11 @@ export const CHAVE_TEMA = "tema";
 export const SCRIPT_TEMA = `try{if(localStorage.getItem("${CHAVE_TEMA}")==="claro")document.documentElement.classList.remove("dark")}catch(e){}`;
 
 export function aplicarTema(tema: Tema) {
-  document.documentElement.classList.toggle("dark", tema === "escuro");
+  const html = document.documentElement;
+  // troca todas as cores de uma vez (sem transição); libera as transições dois quadros depois
+  html.classList.add("trocando-tema");
+  html.classList.toggle("dark", tema === "escuro");
+  requestAnimationFrame(() => requestAnimationFrame(() => html.classList.remove("trocando-tema")));
   try {
     localStorage.setItem(CHAVE_TEMA, tema);
   } catch {
