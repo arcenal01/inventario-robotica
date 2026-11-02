@@ -33,7 +33,10 @@ export function AvisoFila() {
             <CloudUpload className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span className="flex-1">
               <span className="font-semibold">{pendentes === 1 ? "1 contagem guardada" : `${pendentes} contagens guardadas`} neste aparelho.</span>{" "}
-              Serão enviadas sozinhas quando a conexão voltar.
+              Serão enviadas sozinhas quando a conexão voltar.{" "}
+              <Link href="/pendencias" className="underline">
+                Ver
+              </Link>
             </span>
             <button
               type="button"
@@ -58,8 +61,8 @@ export function AvisoFila() {
               <span className="font-semibold">
                 {recusados === 1 ? "1 contagem guardada foi recusada" : `${recusados} contagens guardadas foram recusadas`} pelo servidor.
               </span>{" "}
-              <Link href={`/contagens/${recusado.contagemId}/contar`} className="underline">
-                Ver o motivo
+              <Link href="/pendencias" className="underline">
+                Ver e resolver
               </Link>
             </span>
           </p>

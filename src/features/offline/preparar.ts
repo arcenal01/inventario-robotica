@@ -44,7 +44,7 @@ export async function prepararOffline(queryClient: QueryClient): Promise<boolean
       }),
     );
 
-    guardarPaginas(["/", "/itens", "/enderecos", "/contagens", ...ativas.flatMap((c) => [`/contagens/${c.id}`, `/contagens/${c.id}/contar`])]);
+    guardarPaginas(["/", "/itens", "/enderecos", "/contagens", "/pendencias", ...ativas.flatMap((c) => [`/contagens/${c.id}`, `/contagens/${c.id}/contar`])]);
     // o leitor de QR é carregado só ao abrir a câmera: carregar agora deixa o arquivo guardado para uso offline
     void import("jsqr").catch(() => undefined);
     return true;

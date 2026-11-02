@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   deveGuardar,
+  dicaRecusa,
   descreverAtualizacao,
   eFalhaTemporaria,
   itensNaFila,
@@ -71,4 +72,25 @@ test("descrição de quando os dados foram guardados", () => {
   const agora = new Date(2026, 10, 1, 15, 0).getTime();
   assert.match(descreverAtualizacao(new Date(2026, 10, 1, 9, 5).getTime(), agora), /^hoje às 09:05$/);
   assert.match(descreverAtualizacao(new Date(2026, 9, 30, 18, 40).getTime(), agora), /^30\/10\/2026 às 18:40$/);
+});
+
+test("dica da recusa: o que dá para corrigir e o que só dá para descartar", () => {
+  const encerrada = dicaRecusa("Esta contagem não está recebendo contagens (status: em_revisao).");
+  assert.equal(encerrada.podeCorrigir, false);
+  assert.match(encerrada.texto, /encerrada ou cancelada/);
+  assert.equal(dicaRecusa("Contagem não encontrada.").podeCorrigir, false);
+  assert.equal(dicaRecusa("Este endereço não faz parte desta contagem.").podeCorrigir, false);
+  assert.equal(dicaRecusa("Sem permissão.").podeCorrigir, false);
+
+  const contado = dicaRecusa("O item SEN-002 já foi contado neste endereço.");
+  assert.equal(contado.podeCorrigir, true);
+  assert.equal(contado.codigoItem, "SEN-002");
+  assert.match(contado.texto, /Tire o item/);
+  assert.equal(dicaRecusa("A recontagem de MOT-1000 deve ser feita por outra pessoa.").codigoItem, "MOT-1000");
+  assert.equal(dicaRecusa("O item ARD-007 não pertence à categoria desta contagem.").podeCorrigir, true);
+
+  const outra = dicaRecusa("Itens em unidade \"un\" aceitam apenas quantidade inteira.");
+  assert.equal(outra.podeCorrigir, true);
+  assert.equal(outra.codigoItem, null);
+  assert.equal(dicaRecusa(null).podeCorrigir, true);
 });

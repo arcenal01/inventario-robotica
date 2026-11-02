@@ -32,17 +32,22 @@ export function useOffline() {
 
 /** Lista da fila do aparelho, atualizada sozinha quando algo entra ou sai (liveQuery do Dexie). */
 export function useFila(): EnvioFila[] {
+  return useFilaComEstado().fila;
+}
+
+/** Igual a useFila, dizendo também se a primeira leitura do aparelho já terminou (evita mostrar "vazio" antes da hora). */
+export function useFilaComEstado(): { fila: EnvioFila[]; carregada: boolean } {
   const { banco } = useOffline();
-  const [fila, setFila] = useState<EnvioFila[]>([]);
+  const [estado, setEstado] = useState<{ fila: EnvioFila[]; carregada: boolean }>({ fila: [], carregada: false });
   useEffect(() => {
     if (!banco) return;
     const assinatura = liveQuery(() => banco.fila.orderBy("criadoEm").toArray()).subscribe({
-      next: setFila,
-      error: () => setFila([]),
+      next: (fila) => setEstado({ fila, carregada: true }),
+      error: () => setEstado({ fila: [], carregada: true }),
     });
     return () => assinatura.unsubscribe();
   }, [banco]);
-  return fila;
+  return estado;
 }
 
 export async function enfileirar(banco: BancoOffline, envio: Omit<EnvioFila, "criadoEm" | "estado" | "motivo" | "tentativas">) {
@@ -107,4 +112,29 @@ export function sincronizarFila(banco: BancoOffline): Promise<ResultadoEnvio> {
   });
   emAndamento = envio;
   return envio;
+}
+
+// ---------------------------------------------------------------------
+// Bloco 15B: ações da tela de pendências
+// ---------------------------------------------------------------------
+
+/** Apaga o envio do aparelho (o que foi contado nele se perde). */
+export async function descartarEnvio(banco: BancoOffline, chave: string) {
+  await banco.fila.delete(chave);
+}
+
+/** Recusado volta para a fila como está (mesma chave: o banco não gravou nada da tentativa recusada). */
+export async function reenviarEnvio(banco: BancoOffline, chave: string) {
+  await banco.fila.update(chave, { estado: "pendente", motivo: null });
+}
+
+/**
+ * Troca os itens de um envio recusado e o põe de volta na fila com chave NOVA
+ * (o conteúdo mudou; a chave antiga nunca foi gravada, mas chave nova deixa isso explícito).
+ */
+export async function corrigirEnvio(banco: BancoOffline, envio: EnvioFila, itens: EnvioFila["itens"], novaChave: string) {
+  await banco.transaction("rw", banco.fila, async () => {
+    await banco.fila.delete(envio.chave);
+    await banco.fila.put({ ...envio, chave: novaChave, itens, estado: "pendente", motivo: null });
+  });
 }
