@@ -31,7 +31,7 @@ Sem conexão, as telas mostram a cópia guardada e a faixa amarela diz de quando
 4. Quando a conexão volta (evento do navegador, a cada 20 s ou ao voltar para o app), a fila é enviada em ordem:
    - aceito (ou "duplicada" = já tinha chegado) → sai da fila; faixa verde "enviada";
    - falha de rede/servidor → fica na fila e tenta depois;
-   - recusa do banco (ex.: contagem já em revisão, item já contado por outra pessoa) → fica como **Recusada** com o motivo (faixa vermelha e lista na tela de contar). Corrigir/descartar: Bloco 15B.
+   - recusa do banco (ex.: contagem já em revisão, item já contado por outra pessoa) → fica como **Recusada** com o motivo (faixa vermelha e lista na tela de contar). Corrigir/descartar: tela **Pendências** (seção 7, Bloco 15B).
 5. Um envio por vez, também entre abas (Web Locks quando disponível). Reenviar nunca duplica: o banco reconhece a chave.
 
 Observação: a divergência é calculada com o saldo do momento em que a contagem **chega** ao servidor (igual a contar online e enviar naquele instante).
@@ -59,3 +59,27 @@ Ao tocar em Sair: tenta enviar a fila; se ainda sobrar algo, pergunta antes (o q
 | 6 | Sair com algo na fila | pergunta antes; depois o banco `inventario-...` some do F12 |
 
 Automáticos: `npm test`, `npm run typecheck`, `npm run lint`, `npm run build`, `npm run db:testes`.
+
+## 7. Pendências: resolver contagens recusadas (Bloco 15B)
+
+Tela **/pendencias** ("Pendências deste aparelho"), aberta pelos links "Ver" e "Ver e resolver" das faixas azul e vermelha e pela tela de contar. Funciona sem conexão (lê só o aparelho).
+
+| Situação | O que a tela oferece |
+|---|---|
+| Aguardando envio | **Enviar agora** (todas) e **Descartar** (uma) |
+| Recusada, dá para corrigir (item já contado por outra pessoa, recontagem que precisa ser de outra pessoa, item fora da categoria, quantidade inválida) | **Corrigir**: o item citado no motivo vem em branco e destacado; branco = tira o item; **Salvar e enviar** manda com chave NOVA. Também **Tentar de novo** e **Descartar** |
+| Recusada, não adianta corrigir (contagem encerrada/cancelada, posição fora da contagem, sem permissão) | dica explicando; **Tentar de novo** e **Descartar** (sem Corrigir) |
+
+- Cada recusa mostra o motivo do banco e uma dica em português simples (`dicaRecusa` em `regras.ts`, testada).
+- Recusada não gravou nada no banco; por isso "Tentar de novo" pode usar a mesma chave. Corrigir troca a chave porque o conteúdo mudou.
+- Descartar pede confirmação (o que foi contado ali se perde).
+- A tela não está no menu: só tem algo quando há pendências, e as faixas de aviso sempre levam até ela.
+
+Arquivos: `src/app/(app)/pendencias/page.tsx`, `src/features/offline/painel-pendencias.tsx`; ações `descartarEnvio`, `reenviarEnvio`, `corrigirEnvio` e `useFilaComEstado` em `fila.ts`.
+
+| # | Faça | Esperado |
+|---|---|---|
+| 7 | Sem servidor, aluno 1 conta uma posição; com conexão, aluno 2 conta um dos mesmos itens; religue o servidor | faixa vermelha "1 contagem guardada foi recusada" |
+| 8 | Toque em "Ver e resolver" > Corrigir | item do conflito em branco e destacado, o resto mantido |
+| 9 | Salvar e enviar | "1 enviada(s)"; professor vê o item do aluno 2 e os demais do aluno 1 |
+| 10 | Numa recusada de contagem encerrada | sem Corrigir; Descartar pede confirmação e limpa |

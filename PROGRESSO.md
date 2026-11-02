@@ -1,6 +1,6 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.15.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Versão atual: v0.15.1 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
 Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
@@ -12,6 +12,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
+- Bloco 15B (v0.15.1): tela de Pendências para corrigir/reenviar/descartar contagens recusadas (rota /pendencias, src/features/offline/painel-pendencias.tsx, seção 7 de docs/15a-offline.md); sem migration
 - Bloco 15A (v0.15.0): uso offline com dados no aparelho e fila da contagem (0010_contagem_offline.sql, bloco15_testes.sql, src/features/offline, docs/15a-offline.md, tests/offline.test.mjs); biblioteca nova dexie
 - Bloco 14 (v0.14.0): PWA, cache, HTTPS por túnel e indicador de conexão (public/sw.js, public/offline.html, public/icones/, src/app/manifest.ts, src/components/pwa.tsx, src/components/form-sair.tsx, src/lib/env.ts, next.config.ts, docs/14-pwa-https.md; scripts producao e tunel); sem migration
 - Bloco 13 (v0.13.0): painel no Início e relatórios (src/features/relatorios, rotas /relatorios e /relatorios/[tipo], docs/13-painel-relatorios.md, tests/relatorios.test.mjs); sem migration nova
@@ -82,6 +83,11 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - No escuro, as cores de aviso do Tailwind (red/emerald/amber) são remapeadas em globals.css, sem mexer nas telas
 - Impressão SEMPRE em papel branco: bloco @media print fora de @layer (corrigido no Bloco 13; antes saía escuro)
 - Demonstração: toda mudança de visual termina com o app aberto no Chrome do usuário, já logado (pedido do usuário)
+
+### Bloco 15B (pendências)
+- /pendencias para todos os aprovados, fora do menu (as faixas de aviso e a tela de contar levam até ela); funciona offline
+- Aguardando envio: Enviar agora / Descartar; Recusada: motivo + dica em português (dicaRecusa), Tentar de novo (mesma chave: recusa não grava nada), Corrigir (só quando adianta; item citado no motivo vem em branco; chave NOVA), Descartar com confirmação
+- Conflito "item já contado por outra pessoa" resolvido tirando o item e enviando o resto
 
 ### Bloco 15A (dados no aparelho e fila da contagem)
 - Offline só para consulta (itens, saldos, endereços, contagens) e contagem (escolha do usuário); movimentações, empréstimos, pedidos e romaneios continuam online
@@ -190,7 +196,6 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 
 ## Pendências
 - Túnel com endereço FIXO: precisa de conta Cloudflare + domínio próprio (decisão do usuário); com o túnel rápido o endereço muda a cada reinício e o app instalado precisa ser reinstalado
-- Bloco 15B: tela de pendências (corrigir/reenviar/descartar contagens recusadas)
 - Nuvem: se a confirmação de e-mail estiver ligada, o cadastro mostra "confirme seu e-mail" (já tratado na tela)
 - Offline das telas de login/usuários: Blocos 14 e 15
 - Romaneio: saldo não reservado; se o estoque mudar entre gerar e entregar, a entrega falha e nada é baixado
@@ -200,6 +205,7 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - v0.8.1: banco REAL testado no PC (Supabase CLI 2.122, Postgres 17.11): migrations 0001-0008 e seed aplicados sem erro (db:reset); os 9 arquivos de teste SQL passaram (sem erro e sem "FALHOU"); login dos usuários do seed (admin@, prof@, aluno1@) funciona na API de Auth; scripts/rodar-testes.mjs e gerar-tipos.mjs funcionam no Windows
 - v0.8.1: workflows ci.yml e banco.yml executados no GitHub (PR #1): os dois passaram
 - v0.12.0: telas de contagem testadas num Chrome sem janela (cliques reais de professor e 2 alunos, 36 verificações, sem erro no console) e leitor de QR testado com câmera falsa usando a etiqueta gerada pelo app (8 verificações)
+- v0.15.1: Pendências testada no Chrome sem janela com conflito real (aluno 1 offline x aluno 2 online no mesmo item), tela offline, correção, reenvio e descarte: 23 verificações; teste do 15A repetido (27)
 - v0.15.0: offline testado no Chrome sem janela com o servidor DESLIGADO de verdade (preparação automática, consulta, contagem na fila, envio sozinho ao religar, idempotência, recusa com motivo, Sair apagando o IndexedDB: 27 verificações); testes dos Blocos 12 (36) e 14 (21) repetidos sem falha. Nenhum celular de verdade testado ainda
 - v0.14.0: PWA testado no Chrome sem janela (service worker, cache, servidor desligado de verdade, página offline, sair limpa cache, 21 verificações) e pelo túnel https real da Cloudflare (login, dados, service worker, logout, 9 verificações); túnel fechado após o teste. Nenhum celular de verdade foi testado ainda
 - v0.13.0: painel e relatórios testados no Chrome sem janela (professor e aluno, download real dos CSV, PDF gerado e conferido em papel branco, 27 verificações, sem erro no console)

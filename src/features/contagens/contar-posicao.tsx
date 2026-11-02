@@ -382,7 +382,13 @@ function GuardadosNoAparelho({ envios, aoEnviar }: { envios: EnvioFila[]; aoEnvi
         ))}
       </ul>
       {envios.some((e) => e.estado === "recusado") ? (
-        <p className="text-xs text-muted-foreground">Corrigir ou descartar as recusadas chega no Bloco 15B. Por enquanto, avise o professor.</p>
+        <p className="text-xs text-muted-foreground">
+          Para corrigir ou descartar as recusadas, abra{" "}
+          <Link href="/pendencias" className="text-primary hover:underline">
+            Pendências
+          </Link>
+          .
+        </p>
       ) : null}
     </div>
   );
