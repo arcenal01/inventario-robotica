@@ -27,7 +27,7 @@ export function BotaoTema({ className, comTexto = false }: { className?: string;
       aria-label={rotulo}
       title={rotulo}
       className={cn(
-        "inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm text-muted-foreground pressionar hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         className,
       )}
     >

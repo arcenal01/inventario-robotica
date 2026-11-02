@@ -44,7 +44,7 @@ function Indicador({
 }) {
   return (
     <Link href={href} className="group block">
-      <Card className={cn("h-full p-4 transition-colors group-hover:border-primary/50 group-hover:bg-accent", alerta && "border-amber-300/60")}>
+      <Card className={cn("h-full p-4 pressionar-suave group-hover:border-primary/50 group-hover:bg-accent", alerta && "border-amber-300/60")}>
         <div className="flex items-start justify-between gap-2">
           <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg", alerta ? "bg-amber-100 text-amber-900" : "bg-accent text-primary")}>
             <Icone className="h-[18px] w-[18px]" aria-hidden="true" />
@@ -65,7 +65,7 @@ function Atalho({ href, Icone, titulo, texto, contador }: { href: string; Icone:
     <Link href={href} className="group block">
       <Card
         className={cn(
-          "flex h-full items-center gap-4 p-4 transition-colors group-hover:border-primary/50 group-hover:bg-accent",
+          "flex h-full items-center gap-4 p-4 pressionar-suave group-hover:border-primary/50 group-hover:bg-accent",
           contador && "border-amber-300/60",
         )}
       >

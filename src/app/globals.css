@@ -166,3 +166,98 @@
     letter-spacing: -0.02em;
   }
 }
+
+/* =====================================================================
+   Movimento e toque (polimento pela skill emil-design-eng)
+   - Curva de saída forte: começa rápido (responde na hora) e assenta suave.
+   - Animação só onde tem propósito: retorno ao toque, entrada de janela e de aviso.
+   - Entrada animada, saída instantânea (o sistema responde rápido).
+   - Só transform e opacity (não recalcula layout).
+   ===================================================================== */
+:root {
+  --ease-saida: cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Retorno ao toque: o elemento "afunda" 3% enquanto está pressionado (botões, abas, ícones). */
+@utility pressionar {
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-saida);
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+/* Mesmo retorno para cartões grandes (lista de contagens, atalhos): menos escala, senão parece que pula. */
+@utility pressionar-suave {
+  transition-property: color, background-color, border-color, box-shadow, transform;
+  transition-duration: 160ms;
+  transition-timing-function: var(--ease-saida);
+  &:active {
+    transform: scale(0.985);
+  }
+}
+
+/* Avisos e mensagens que aparecem: entram com um leve deslize de 4px em vez de "estalar" na tela. */
+@utility surgir {
+  transition-property: opacity, transform;
+  transition-duration: 200ms;
+  transition-timing-function: var(--ease-saida);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+@layer base {
+  /* Toque: sem espera de duplo toque para zoom em botões e links */
+  a,
+  button,
+  input,
+  select,
+  textarea,
+  label,
+  summary,
+  [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Janela (diálogo): entra do centro, de 96% para 100%, com o fundo escurecendo junto. Modal fica centralizado. */
+  dialog.dialogo[open] {
+    transition:
+      opacity 200ms var(--ease-saida),
+      transform 200ms var(--ease-saida);
+    @starting-style {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+  }
+  dialog.dialogo[open]::backdrop {
+    transition: opacity 200ms var(--ease-saida);
+    @starting-style {
+      opacity: 0;
+    }
+  }
+}
+
+/* Trocar o tema muda todas as cores de uma vez: sem transição, para não ver as cores "escorrendo" uma a uma */
+.trocando-tema,
+.trocando-tema *,
+.trocando-tema *::before,
+.trocando-tema *::after {
+  transition: none !important;
+}
+
+/* Quem pediu menos movimento no aparelho: fica só o esmaecer (ajuda a entender), sem escala nem deslize */
+@media (prefers-reduced-motion: reduce) {
+  .pressionar:active,
+  .pressionar-suave:active {
+    transform: none;
+  }
+  .surgir,
+  dialog.dialogo[open] {
+    @starting-style {
+      transform: none;
+    }
+  }
+}

@@ -29,7 +29,7 @@ export default async function PaginaRelatorios() {
           return (
             <li key={t}>
               <Link href={`/relatorios/${t}`} className="group block h-full">
-                <Card className="flex h-full items-center gap-4 p-4 transition-colors group-hover:border-primary/50 group-hover:bg-accent">
+                <Card className="flex h-full items-center gap-4 p-4 pressionar-suave group-hover:border-primary/50 group-hover:bg-accent">
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent text-primary">
                     <Icone className="h-5 w-5" aria-hidden="true" />
                   </span>

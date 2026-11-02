@@ -21,6 +21,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // iPhone com app instalado: deixa env(safe-area-inset-*) valer (barra de baixo acima da barra de gestos)
+  viewportFit: "cover",
   themeColor: "#151a26",
 };
 

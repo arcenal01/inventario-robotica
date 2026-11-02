@@ -35,7 +35,7 @@ export function Dialogo({
         if (e.target === ref.current) aoFechar();
       }}
       aria-label={titulo}
-      className="m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border bg-card p-0 text-card-foreground shadow-2xl shadow-black/40 backdrop:bg-black/60 backdrop:backdrop-blur-sm"
+      className="dialogo m-auto w-[calc(100%-2rem)] max-w-md rounded-xl border bg-card p-0 text-card-foreground shadow-2xl shadow-black/40 backdrop:bg-black/60 backdrop:backdrop-blur-sm"
     >
       {aberto ? (
         <div className="space-y-4 p-4 sm:p-6">

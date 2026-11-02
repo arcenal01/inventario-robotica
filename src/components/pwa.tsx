@@ -88,7 +88,7 @@ export function AvisoConexao() {
   if (estado === "online") return null;
   const Icone = estado === "sem_internet" ? CloudOff : ServerCrash;
   return (
-    <div role="status" className="border-b border-amber-300/50 bg-amber-50 text-amber-900 print:hidden">
+    <div role="status" className="surgir border-b border-amber-300/50 bg-amber-50 text-amber-900 print:hidden">
       <p className="mx-auto flex max-w-5xl items-center gap-2 px-4 py-2 text-sm md:px-8">
         <Icone className="h-4 w-4 shrink-0" aria-hidden="true" />
         <span>

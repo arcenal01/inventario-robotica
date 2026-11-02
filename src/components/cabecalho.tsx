@@ -32,7 +32,7 @@ function BotaoSair({ comTexto = false }: { comTexto?: boolean }) {
         type="submit"
         title="Sair"
         aria-label="Sair"
-        className="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm text-muted-foreground transition-colors hover:bg-red-50 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="inline-flex h-9 items-center gap-2 rounded-lg px-2.5 text-sm text-muted-foreground pressionar hover:bg-red-50 hover:text-red-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       >
         <LogOut className="h-4 w-4" aria-hidden="true" />
         {comTexto ? <span>Sair</span> : null}

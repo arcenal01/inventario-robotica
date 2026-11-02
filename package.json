@@ -1,6 +1,6 @@
 {
   "name": "inventario-robotica",
-  "version": "0.15.1",
+  "version": "0.15.2",
   "private": true,
   "description": "Controle de inventário da sala de robótica (PWA + Supabase)",
   "engines": {
