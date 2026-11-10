@@ -283,14 +283,14 @@ isOneToOne: false
                   ]
                 },"itens": {
                   Row: {
-                    "atualizado_em": string,"categoria_id": string,"codigo": string,"criado_em": string,"descricao": string | null,"especificacoes": NonNullable<Json>,"estoque_minimo": number,"foto_url": string | null,"id": string,"nome": string,"status": Database["public"]['Enums']["status_item"],"tipo_controle": Database["public"]['Enums']["tipo_controle"],"unidade": Database["public"]['Enums']["unidade_medida"]
+                    "atualizado_em": string,"categoria_id": string,"codigo": string,"criado_em": string,"descricao": string | null,"especificacoes": NonNullable<Json>,"estoque_minimo": number,"foto_url": string | null,"id": string,"nome": string,"repor": boolean,"status": Database["public"]['Enums']["status_item"],"tipo_controle": Database["public"]['Enums']["tipo_controle"],"unidade": Database["public"]['Enums']["unidade_medida"]
                   }
                   ComputedFields: never
                   Insert: {
-                    "atualizado_em"?: string,"categoria_id": string,"codigo"?: string,"criado_em"?: string,"descricao"?: string | null,"especificacoes"?: NonNullable<Json>,"estoque_minimo"?: number,"foto_url"?: string | null,"id"?: string,"nome": string,"status"?: Database["public"]['Enums']["status_item"],"tipo_controle"?: Database["public"]['Enums']["tipo_controle"],"unidade"?: Database["public"]['Enums']["unidade_medida"]
+                    "atualizado_em"?: string,"categoria_id": string,"codigo"?: string,"criado_em"?: string,"descricao"?: string | null,"especificacoes"?: NonNullable<Json>,"estoque_minimo"?: number,"foto_url"?: string | null,"id"?: string,"nome": string,"repor"?: boolean,"status"?: Database["public"]['Enums']["status_item"],"tipo_controle"?: Database["public"]['Enums']["tipo_controle"],"unidade"?: Database["public"]['Enums']["unidade_medida"]
                   }
                   Update: {
-                    "atualizado_em"?: string,"categoria_id"?: string,"codigo"?: string,"criado_em"?: string,"descricao"?: string | null,"especificacoes"?: NonNullable<Json>,"estoque_minimo"?: number,"foto_url"?: string | null,"id"?: string,"nome"?: string,"status"?: Database["public"]['Enums']["status_item"],"tipo_controle"?: Database["public"]['Enums']["tipo_controle"],"unidade"?: Database["public"]['Enums']["unidade_medida"]
+                    "atualizado_em"?: string,"categoria_id"?: string,"codigo"?: string,"criado_em"?: string,"descricao"?: string | null,"especificacoes"?: NonNullable<Json>,"estoque_minimo"?: number,"foto_url"?: string | null,"id"?: string,"nome"?: string,"repor"?: boolean,"status"?: Database["public"]['Enums']["status_item"],"tipo_controle"?: Database["public"]['Enums']["tipo_controle"],"unidade"?: Database["public"]['Enums']["unidade_medida"]
                   }
                   Relationships: [
                     {
@@ -848,7 +848,7 @@ isOneToOne: false
                   ]
                 },"vw_itens_estoque": {
                   Row: {
-                    "abaixo_minimo": boolean | null,"atualizado_em": string,"categoria_id": string,"categoria_nome": string,"categoria_prefixo": string,"codigo": string,"criado_em": string,"descricao": string | null,"emprestado_em_aberto": number | null,"enderecos_com_saldo": number | null,"especificacoes": NonNullable<Json>,"estoque_minimo": number,"foto_url": string | null,"id": string,"nome": string,"saldo_total": number | null,"status": Database["public"]['Enums']["status_item"],"tipo_controle": Database["public"]['Enums']["tipo_controle"],"unidade": Database["public"]['Enums']["unidade_medida"]
+                    "abaixo_minimo": boolean | null,"atualizado_em": string,"categoria_id": string,"categoria_nome": string,"categoria_prefixo": string,"codigo": string,"criado_em": string,"descricao": string | null,"emprestado_em_aberto": number | null,"enderecos_com_saldo": number | null,"esgotado": boolean | null,"especificacoes": NonNullable<Json>,"estoque_minimo": number,"foto_url": string | null,"id": string,"nome": string,"repor": boolean,"saldo_total": number | null,"status": Database["public"]['Enums']["status_item"],"tipo_controle": Database["public"]['Enums']["tipo_controle"],"unidade": Database["public"]['Enums']["unidade_medida"]
                   }
                   ComputedFields: never
                   Relationships: [
@@ -923,6 +923,7 @@ isOneToOne: false
 "foto_url": string | null,
 "id": string,
 "nome": string,
+"repor": boolean,
 "status": Database["public"]['Enums']["status_item"],
 "tipo_controle": Database["public"]['Enums']["tipo_controle"],
 "unidade": Database["public"]['Enums']["unidade_medida"]

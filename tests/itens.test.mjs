@@ -1,12 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { FILTROS_INICIAIS, filtrarItens, formatarQuantidade, normalizar, ordenarItens } from "../src/features/itens/filtros.ts";
+import { FILTROS_INICIAIS, filtrarItens, formatarQuantidade, normalizar, ordenarItens, precisaRepor } from "../src/features/itens/filtros.ts";
 import { esquemaCategoria, esquemaItem, especificacoesParaJson, jsonParaEspecificacoes } from "../src/features/itens/schemas.ts";
 
-const base = { descricao: null, categoria_id: "sen", tipo_controle: "consumivel", status: "ativo", abaixo_minimo: false };
+const base = { descricao: null, categoria_id: "sen", tipo_controle: "consumivel", status: "ativo", esgotado: false, repor: true };
 const itens = [
   { ...base, codigo: "SEN-001", nome: "Sensor ultrassônico HC-SR04" },
-  { ...base, codigo: "SEN-002", nome: "Sensor infravermelho", abaixo_minimo: true },
+  { ...base, codigo: "SEN-002", nome: "Sensor infravermelho", esgotado: true },
   { ...base, codigo: "MOT-001", nome: "Motor elétrico DC", categoria_id: "mot", descricao: "Com caixa de redução" },
   { ...base, codigo: "FER-001", nome: "Multímetro", categoria_id: "fer", tipo_controle: "emprestavel" },
   { ...base, codigo: "FER-002", nome: "Alicate antigo", categoria_id: "fer", tipo_controle: "emprestavel", status: "inativo" },
@@ -26,17 +26,26 @@ test("busca por código, descrição e várias palavras", () => {
   assert.deepEqual(codigos(filtrarItens(itens, f({ busca: "sensor hc" }))), ["SEN-001"]);
 });
 
-test("padrão mostra só ativos; filtros de categoria, tipo e mínimo", () => {
+test("padrão mostra só ativos; filtros de categoria, tipo e 'acabou'", () => {
   assert.equal(filtrarItens(itens, FILTROS_INICIAIS).length, 4);
   assert.equal(filtrarItens(itens, f({ status: "" })).length, 5);
   assert.deepEqual(codigos(filtrarItens(itens, f({ status: "inativo" }))), ["FER-002"]);
   assert.deepEqual(codigos(filtrarItens(itens, f({ categoriaId: "sen" }))), ["SEN-001", "SEN-002"]);
   assert.deepEqual(codigos(filtrarItens(itens, f({ tipoControle: "emprestavel" }))), ["FER-001"]);
-  assert.deepEqual(codigos(filtrarItens(itens, f({ soAbaixoMinimo: true }))), ["SEN-002"]);
+  assert.deepEqual(codigos(filtrarItens(itens, f({ soAcabou: true }))), ["SEN-002"]);
 });
 
-test("ordem: abaixo do mínimo primeiro, depois por nome", () => {
+test("ordem: os que acabaram (e são para repor) primeiro, depois por nome", () => {
   assert.deepEqual(codigos(ordenarItens(itens.slice(0, 4))), ["SEN-002", "MOT-001", "FER-001", "SEN-001"]);
+  // "não terá mais" não sobe para o topo
+  const naoRepor = itens.slice(0, 4).map((i) => (i.codigo === "SEN-002" ? { ...i, repor: false } : i));
+  assert.deepEqual(codigos(ordenarItens(naoRepor)), ["MOT-001", "FER-001", "SEN-002", "SEN-001"]);
+});
+
+test("aviso de repor só quando acabou e não está marcado 'não terá mais'", () => {
+  assert.equal(precisaRepor({ esgotado: true, repor: true }), true);
+  assert.equal(precisaRepor({ esgotado: true, repor: false }), false);
+  assert.equal(precisaRepor({ esgotado: false, repor: true }), false);
 });
 
 test("quantidade sem zeros inúteis", () => {
@@ -46,16 +55,13 @@ test("quantidade sem zeros inúteis", () => {
 
 const itemValido = {
   nome: "Sensor HC-SR04", categoria_id: "x", unidade: "un", tipo_controle: "consumivel",
-  descricao: "", estoque_minimo: 5, especificacoes: [], ativo: true,
+  descricao: "", especificacoes: [], ativo: true,
 };
 
-test("item: aceita válido; 'un' exige mínimo inteiro; 'm' aceita quebrado", () => {
+test("item: aceita válido; 'repor' vem ligado por padrão; unidade fora da lista recusada", () => {
   assert.equal(esquemaItem.safeParse(itemValido).success, true);
-  const r = esquemaItem.safeParse({ ...itemValido, estoque_minimo: 2.5 });
-  assert.equal(r.success, false);
-  assert.deepEqual(r.error.issues[0].path, ["estoque_minimo"]);
-  assert.equal(esquemaItem.safeParse({ ...itemValido, unidade: "m", estoque_minimo: 2.5 }).success, true);
-  assert.equal(esquemaItem.safeParse({ ...itemValido, estoque_minimo: -1 }).success, false);
+  assert.equal(esquemaItem.parse(itemValido).repor, true);
+  assert.equal(esquemaItem.parse({ ...itemValido, repor: false }).repor, false);
   assert.equal(esquemaItem.safeParse({ ...itemValido, unidade: "litro" }).success, false);
 });
 

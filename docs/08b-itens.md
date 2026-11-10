@@ -4,10 +4,10 @@ Tela para consultar o estoque, cadastrar e editar itens (com foto e especificaç
 
 ## 1. Como os itens funcionam
 
-- Cada item tem **código automático e definitivo**, formado pelo prefixo da categoria e um contador próprio de cada prefixo: `SEN-001`, `SEN-002`, `MOT-001`. Depois do 999 vem `SEN-1000`.
+- Cada item tem **código automático e definitivo**, formado por um prefixo e um contador próprio de cada prefixo: `SEN-001`, `SEN-002`, `MOT-001`. Depois do 999 vem `SEN-1000`. O prefixo é o da categoria, a não ser que se escreva outro no cadastro (`ALI` gera `ALI-001`): veja docs/15c-codigo-importacao-etiquetas.md.
 - **Unidade**: `un`, `m` ou `kg`. Em `un` as quantidades (e o estoque mínimo) são inteiras.
 - **Tipo de controle**: `consumivel` (a saída é baixa definitiva) ou `emprestavel` (sai por empréstimo e volta).
-- **Estoque mínimo**: 0 = sem alerta. Acima de 0, o item ativo com saldo menor aparece como **Abaixo do mínimo**.
+- **Aviso de estoque** (v0.15.4, substitui o "estoque mínimo"): quando o item **acaba** (já teve estoque, saldo zero e nada emprestado), aparece **Acabou: repor**. Na ficha, **Não terá mais** desliga o aviso daquele item (e **Voltar a repor** liga de novo); no cadastro é a caixa **Repor quando acabar**. Veja a seção 5 de docs/15c-codigo-importacao-etiquetas.md. O campo estoque mínimo continua no banco, mas a tela não usa mais.
 - **Especificações**: pares nome = valor (ex.: `Tensão = 5 V`), até 20 por item.
 - **Inativo**: some da lista padrão e não recebe entradas; o histórico continua.
 

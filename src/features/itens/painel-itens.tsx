@@ -5,20 +5,27 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Dialogo } from "@/components/ui/dialogo";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import type { PapelUsuario } from "@/types";
 import { DialogoMovimento } from "@/features/estoque/dialogo-movimento";
+import { normalizarCodigo } from "@/features/leitor/codigo-endereco";
+import { LeitorQr } from "@/features/leitor/leitor-qr";
 import { useCategorias, useItens, type ItemLista } from "./consultas";
 import { DetalheItem } from "./detalhe-item";
 import { DialogoItem } from "./dialogo-item";
-import { FILTROS_INICIAIS, filtrarItens, formatarQuantidade, ordenarItens, type Filtros } from "./filtros";
+import { FILTROS_INICIAIS, filtrarItens, formatarQuantidade, ordenarItens, precisaRepor, type Filtros } from "./filtros";
 import { urlFoto } from "./foto";
 
 type Janela =
   | { tipo: "detalhe" | "entrada"; item: ItemLista }
   | { tipo: "editar"; item: ItemLista | null }
+  | { tipo: "ler_qr" }
   | null;
+
+/** Até aqui a folha de etiquetas recebe os códigos na URL; acima disso, imprime por categoria ou tudo. */
+const MAX_CODIGOS_URL = 300;
 
 /** Lista de itens com busca e filtros. Professor/admin cadastram e editam; aluno só consulta. */
 export function PainelItens({ papel }: { papel: PapelUsuario }) {
@@ -30,7 +37,7 @@ export function PainelItens({ papel }: { papel: PapelUsuario }) {
   const podeEditar = papel === "admin" || papel === "professor";
 
   const visiveis = useMemo(() => ordenarItens(filtrarItens(itensQ.data ?? [], filtros)), [itensQ.data, filtros]);
-  const abaixoMinimo = useMemo(() => (itensQ.data ?? []).filter((i) => i.abaixo_minimo).length, [itensQ.data]);
+  const acabaram = useMemo(() => (itensQ.data ?? []).filter(precisaRepor).length, [itensQ.data]);
 
   function mudar<K extends keyof Filtros>(chave: K, valor: Filtros[K]) {
     setFiltros((f) => ({ ...f, [chave]: valor }));
@@ -47,22 +54,53 @@ export function PainelItens({ papel }: { papel: PapelUsuario }) {
 
   const categorias = categoriasQ.data ?? [];
   const filtrosAlterados = JSON.stringify(filtros) !== JSON.stringify(FILTROS_INICIAIS);
+  const linkEtiquetas = !filtrosAlterados
+    ? "/itens/etiquetas?todos=1"
+    : visiveis.length <= MAX_CODIGOS_URL
+      ? `/itens/etiquetas?codigos=${visiveis.map((i) => encodeURIComponent(i.codigo)).join(",")}`
+      : filtros.categoriaId
+        ? `/itens/etiquetas?categoria=${filtros.categoriaId}`
+        : "/itens/etiquetas?todos=1";
+  const classeLink = "inline-flex h-9 items-center rounded-md border border-input px-3 text-sm font-medium hover:bg-secondary";
+
+  /** QR da etiqueta (ou código digitado): abre a ficha do item; se não achar, joga na busca. */
+  function aoLerCodigo(lido: string) {
+    const codigo = normalizarCodigo(lido);
+    const item = (itensQ.data ?? []).find((i) => i.codigo.toUpperCase() === codigo);
+    if (item) {
+      setJanela({ tipo: "detalhe", item });
+    } else {
+      setJanela(null);
+      setFiltros({ ...FILTROS_INICIAIS, status: "", busca: codigo });
+      setAviso(`Nenhum item com o código ${codigo}. Se for etiqueta de endereço, use a tela Endereços.`);
+    }
+  }
 
   return (
     <div className="space-y-4">
-      {podeEditar ? (
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" onClick={() => setJanela({ tipo: "editar", item: null })}>
-            Novo item
-          </Button>
-          <Link
-            href="/itens/categorias"
-            className="inline-flex h-9 items-center rounded-md border border-input px-3 text-sm font-medium hover:bg-secondary"
-          >
-            Categorias
+      <div className="flex flex-wrap gap-2">
+        {podeEditar ? (
+          <>
+            <Button size="sm" onClick={() => setJanela({ tipo: "editar", item: null })}>
+              Novo item
+            </Button>
+            <Link href="/itens/categorias" className={classeLink}>
+              Categorias
+            </Link>
+            <Link href="/itens/importar" className={classeLink}>
+              Importar planilha
+            </Link>
+          </>
+        ) : null}
+        <Button size="sm" variant="outline" onClick={() => setJanela({ tipo: "ler_qr" })}>
+          Ler QR
+        </Button>
+        {visiveis.length > 0 ? (
+          <Link href={linkEtiquetas} className={classeLink}>
+            {filtrosAlterados ? "Etiquetas dos listados" : "Etiquetas"}
           </Link>
-        </div>
-      ) : null}
+        ) : null}
+      </div>
 
       {aviso ? (
         <p role="status" className="rounded-md bg-emerald-50 p-3 text-sm text-emerald-900">
@@ -70,13 +108,13 @@ export function PainelItens({ papel }: { papel: PapelUsuario }) {
         </p>
       ) : null}
 
-      {abaixoMinimo > 0 && !filtros.soAbaixoMinimo ? (
+      {acabaram > 0 && !filtros.soAcabou ? (
         <button
           type="button"
-          onClick={() => setFiltros({ ...FILTROS_INICIAIS, soAbaixoMinimo: true })}
+          onClick={() => setFiltros({ ...FILTROS_INICIAIS, soAcabou: true })}
           className="w-full rounded-md bg-amber-50 p-3 text-left text-sm text-amber-900 hover:bg-amber-100"
         >
-          {abaixoMinimo === 1 ? "1 item está" : `${abaixoMinimo} itens estão`} abaixo do estoque mínimo. Toque para ver.
+          {acabaram === 1 ? "1 item acabou" : `${acabaram} itens acabaram`} no estoque: repor. Toque para ver.
         </button>
       ) : null}
 
@@ -114,8 +152,8 @@ export function PainelItens({ papel }: { papel: PapelUsuario }) {
         </div>
         <div className="flex flex-wrap items-center justify-between gap-2">
           <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={filtros.soAbaixoMinimo} onChange={(e) => mudar("soAbaixoMinimo", e.target.checked)} />
-            Só abaixo do mínimo
+            <input type="checkbox" checked={filtros.soAcabou} onChange={(e) => mudar("soAcabou", e.target.checked)} />
+            Só os que acabaram
           </label>
           {filtrosAlterados ? (
             <Button variant="ghost" size="sm" onClick={() => setFiltros(FILTROS_INICIAIS)}>
@@ -160,7 +198,9 @@ export function PainelItens({ papel }: { papel: PapelUsuario }) {
                         <span className="mt-1 flex flex-wrap gap-1">
                           {item.tipo_controle === "emprestavel" ? <Badge>Emprestável</Badge> : null}
                           {item.status === "inativo" ? <Badge variant="warning">Inativo</Badge> : null}
-                          {item.abaixo_minimo ? <Badge variant="danger">Abaixo do mínimo</Badge> : null}
+                          {item.esgotado ? (
+                            item.repor ? <Badge variant="danger">Acabou: repor</Badge> : <Badge variant="warning">Não terá mais</Badge>
+                          ) : null}
                         </span>
                       </span>
                       <span className="shrink-0 text-right">
@@ -184,6 +224,16 @@ export function PainelItens({ papel }: { papel: PapelUsuario }) {
           aoEntrada={() => setJanela({ tipo: "entrada", item: janela.item })}
           aoFechar={() => setJanela(null)}
         />
+      ) : null}
+      {janela?.tipo === "ler_qr" ? (
+        <Dialogo aberto titulo="Ler QR do item" aoFechar={() => setJanela(null)}>
+          <LeitorQr aoLer={aoLerCodigo} />
+          <div className="flex justify-end">
+            <Button variant="ghost" onClick={() => setJanela(null)}>
+              Cancelar
+            </Button>
+          </div>
+        </Dialogo>
       ) : null}
       {janela?.tipo === "entrada" ? (
         <DialogoMovimento

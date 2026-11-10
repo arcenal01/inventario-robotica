@@ -1,8 +1,12 @@
 "use client";
 
+import { useState } from "react";
+import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialogo } from "@/components/ui/dialogo";
+import { criarClienteNavegador } from "@/lib/supabase/client";
 import { useSaldosDoItem, type ItemLista } from "./consultas";
 import { formatarQuantidade } from "./filtros";
 import { urlFoto } from "./foto";
@@ -23,7 +27,25 @@ export function DetalheItem({
   aoFechar: () => void;
 }) {
   const saldosQ = useSaldosDoItem(item.id);
+  const queryClient = useQueryClient();
+  const [repor, setRepor] = useState(item.repor);
+  const [salvandoRepor, setSalvandoRepor] = useState(false);
+  const [erroRepor, setErroRepor] = useState<string | null>(null);
   const foto = urlFoto(item.foto_url);
+
+  /** "Não terá mais" (false) ou "Voltar a repor" (true). Só professor/admin (RLS de itens). */
+  async function mudarRepor(valor: boolean) {
+    setErroRepor(null);
+    setSalvandoRepor(true);
+    const { data, error } = await criarClienteNavegador().from("itens").update({ repor: valor }).eq("id", item.id).select("id");
+    setSalvandoRepor(false);
+    if (error || !data || data.length === 0) {
+      setErroRepor(`Não foi possível salvar${error ? `: ${error.message}` : " (sem permissão)"}.`);
+      return;
+    }
+    setRepor(valor);
+    await queryClient.invalidateQueries({ queryKey: ["itens"] });
+  }
   const especificacoes = jsonParaEspecificacoes(item.especificacoes);
 
   return (
@@ -40,7 +62,9 @@ export function DetalheItem({
             <div className="flex flex-wrap gap-1">
               <Badge>{ROTULO_TIPO_CONTROLE[item.tipo_controle].split(" (")[0]}</Badge>
               {item.status === "inativo" ? <Badge variant="warning">Inativo</Badge> : null}
-              {item.abaixo_minimo ? <Badge variant="danger">Abaixo do mínimo</Badge> : null}
+              {item.esgotado ? (
+                repor ? <Badge variant="danger">Acabou: repor</Badge> : <Badge variant="warning">Não terá mais</Badge>
+              ) : null}
             </div>
           </div>
         </div>
@@ -52,14 +76,8 @@ export function DetalheItem({
               {formatarQuantidade(item.saldo_total)} {item.unidade}
             </dd>
           </div>
-          <div>
-            <dt className="text-muted-foreground">Mínimo</dt>
-            <dd className="text-lg font-semibold">
-              {Number(item.estoque_minimo) > 0 ? `${formatarQuantidade(item.estoque_minimo)} ${item.unidade}` : "sem alerta"}
-            </dd>
-          </div>
           {item.tipo_controle === "emprestavel" ? (
-            <div className="col-span-2">
+            <div>
               <dt className="text-muted-foreground">Emprestado (fora da sala)</dt>
               <dd className="font-semibold">
                 {formatarQuantidade(item.emprestado_em_aberto)} {item.unidade}
@@ -67,6 +85,38 @@ export function DetalheItem({
             </div>
           ) : null}
         </dl>
+
+        {item.esgotado ? (
+          <div
+            role="status"
+            className={`space-y-2 rounded-md p-3 text-sm ${repor ? "bg-red-50 text-red-900" : "bg-secondary text-muted-foreground"}`}
+          >
+            <p className="font-semibold">
+              {repor ? "Acabou o estoque: avise para repor." : "Acabou e não terá mais no estoque."}
+            </p>
+            {podeEditar ? (
+              <div className="flex flex-wrap gap-2">
+                {repor ? (
+                  <>
+                    <Button size="sm" onClick={aoEntrada}>
+                      Registrar reposição
+                    </Button>
+                    <Button size="sm" variant="outline" disabled={salvandoRepor} onClick={() => void mudarRepor(false)}>
+                      Não terá mais
+                    </Button>
+                  </>
+                ) : (
+                  <Button size="sm" variant="outline" disabled={salvandoRepor} onClick={() => void mudarRepor(true)}>
+                    Voltar a repor
+                  </Button>
+                )}
+              </div>
+            ) : null}
+            {erroRepor ? <p className="text-red-800">{erroRepor}</p> : null}
+          </div>
+        ) : !repor ? (
+          <p className="text-xs text-muted-foreground">Marcado como “não terá mais”: quando acabar, não aparece aviso para repor.</p>
+        ) : null}
 
         {item.descricao ? <p className="whitespace-pre-line text-sm">{item.descricao}</p> : null}
 
@@ -113,6 +163,12 @@ export function DetalheItem({
         </div>
 
         <div className="flex flex-wrap justify-end gap-2">
+          <Link
+            href={`/itens/etiquetas?codigos=${encodeURIComponent(item.codigo)}`}
+            className="inline-flex h-9 items-center rounded-md border border-input px-3 text-sm font-medium hover:bg-secondary"
+          >
+            Etiqueta QR
+          </Link>
           {podeEditar ? (
             <>
               <Button variant="outline" onClick={aoEntrada} disabled={item.status !== "ativo"}>

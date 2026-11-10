@@ -17,8 +17,10 @@ export type ItemLista = ItemEstoque & {
   status: "ativo" | "inativo";
   saldo_total: number;
   emprestado_em_aberto: number;
-  estoque_minimo: number;
-  abaixo_minimo: boolean;
+  /** false = "não terá mais no estoque": quando acabar, não pede para repor */
+  repor: boolean;
+  /** Já teve estoque e acabou (saldo zero, nada emprestado). Migration 0012. */
+  esgotado: boolean;
 };
 
 /** Todos os itens com saldo. Para uma sala (centenas de itens) carregar tudo e filtrar no celular é mais rápido. */

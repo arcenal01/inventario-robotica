@@ -19,23 +19,31 @@ const especificacao = z.object({
   valor: z.string().trim().min(1, "Informe o valor").max(120, "Máximo 120 caracteres"),
 });
 
+/** Prefixo do código: 2 a 5 letras sem acento (ALI, CHAV). Igual à regra do banco (migration 0011). */
+export const REGEX_PREFIXO = /^[A-Z]{2,5}$/;
+
+/** Código completo do item: ALI-001 ... ALI-999, depois ALI-1000 (sem zeros sobrando). */
+export const REGEX_CODIGO_ITEM = /^[A-Z]{2,5}-(?:\d{3}|[1-9]\d{3,})$/;
+
 export const esquemaItem = z
   .object({
+    // Só no cadastro. Vazio = prefixo da categoria (SEN-001); preenchido = prefixo próprio (ALI-001)
+    prefixo_codigo: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .refine((p) => p === "" || REGEX_PREFIXO.test(p), "Use de 2 a 5 letras, sem números nem acentos")
+      .optional()
+      .default(""),
     nome: z.string().trim().min(2, "Informe o nome").max(80, "Máximo 80 caracteres"),
     categoria_id: z.string().min(1, "Escolha a categoria"),
     unidade: z.enum(UNIDADES),
     tipo_controle: z.enum(TIPOS_CONTROLE),
     descricao: z.string().trim().max(500, "Máximo 500 caracteres"),
-    estoque_minimo: z
-      .number({ invalid_type_error: "Informe um número" })
-      .min(0, "Não pode ser negativo")
-      .max(999999, "Número muito grande"),
+    // true = quando acabar, avisa para repor; false = "não terá mais no estoque"
+    repor: z.boolean().optional().default(true),
     especificacoes: z.array(especificacao).max(20, "Máximo 20 especificações"),
     ativo: z.boolean(),
-  })
-  .refine((d) => d.unidade !== "un" || Number.isInteger(d.estoque_minimo), {
-    message: 'Em "un" o estoque mínimo precisa ser inteiro',
-    path: ["estoque_minimo"],
   })
   .refine((d) => new Set(d.especificacoes.map((e) => e.chave.toLowerCase())).size === d.especificacoes.length, {
     message: "Há especificações com o mesmo nome",
@@ -48,7 +56,7 @@ export const esquemaCategoria = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .regex(/^[A-Z]{2,5}$/, "Use de 2 a 5 letras, sem números nem acentos"),
+    .regex(REGEX_PREFIXO, "Use de 2 a 5 letras, sem números nem acentos"),
 });
 
 export type DadosItem = z.infer<typeof esquemaItem>;

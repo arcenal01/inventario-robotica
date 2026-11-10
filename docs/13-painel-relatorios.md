@@ -6,7 +6,7 @@ Sem migration nova: o painel e os relatórios leem tabelas e views que já exist
 
 | Bloco | Professor/admin | Aluno |
 |---|---|---|
-| Abaixo do mínimo | quantos itens + lista dos 5 mais críticos com barra saldo/mínimo | igual |
+| Acabaram no estoque (v0.15.4; antes "Abaixo do mínimo") | quantos itens acabaram e são para repor + lista de 5 | igual |
 | Pedidos | "para aprovar" (enviados) + total em andamento | os próprios em andamento |
 | Empréstimos | em aberto + quantos atrasados | os próprios |
 | Contagens | em andamento (aberta, em andamento, em revisão) | igual |

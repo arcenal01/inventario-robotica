@@ -105,13 +105,15 @@ export default async function PaginaInicio() {
   const supabase = await criarClienteServidor();
   const n = { count: "exact" as const, head: true };
 
-  const [abaixo, listaAbaixo, abertos, atrasados, contagens, aguardando, emAndamento, cadastros, trocas, movs, meusPedidos] = await Promise.all([
-    supabase.from("vw_itens_estoque").select("id", n).eq("abaixo_minimo", true),
+  const [acabou, listaAcabou, abertos, atrasados, contagens, aguardando, emAndamento, cadastros, trocas, movs, meusPedidos] = await Promise.all([
+    // Acabou e é para repor (marcados "não terá mais" não entram)
+    supabase.from("vw_itens_estoque").select("id", n).eq("esgotado", true).eq("repor", true),
     supabase
       .from("vw_itens_estoque")
-      .select("id, codigo, nome, unidade, saldo_total, estoque_minimo")
-      .eq("abaixo_minimo", true)
-      .order("saldo_total")
+      .select("id, codigo, nome")
+      .eq("esgotado", true)
+      .eq("repor", true)
+      .order("nome")
       .limit(5),
     supabase.from("vw_emprestimos_abertos").select("id", n),
     supabase.from("vw_emprestimos_atrasados").select("id", n),
@@ -141,7 +143,7 @@ export default async function PaginaInicio() {
           .limit(5),
   ]);
 
-  const nAbaixo = contar(abaixo);
+  const nAcabou = contar(acabou);
   const nAtrasados = contar(atrasados);
   const nContagens = contar(contagens);
   const nAguardando = contar(aguardando);
@@ -155,7 +157,7 @@ export default async function PaginaInicio() {
       </div>
 
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4" aria-label="Indicadores">
-        <Indicador href="/itens" Icone={AlertTriangle} numero={nAbaixo} rotulo="Abaixo do mínimo" detalhe={nAbaixo > 0 ? "Repor estoque" : "Tudo em ordem"} alerta={nAbaixo > 0} />
+        <Indicador href="/itens" Icone={AlertTriangle} numero={nAcabou} rotulo="Acabaram no estoque" detalhe={nAcabou > 0 ? "Repor estoque" : "Tudo em ordem"} alerta={nAcabou > 0} />
         <Indicador
           href="/pedidos"
           Icone={ClipboardList}
@@ -194,29 +196,22 @@ export default async function PaginaInicio() {
       ) : null}
 
       <section className="grid gap-3 lg:grid-cols-2">
-        <Secao titulo="Abaixo do estoque mínimo" href="/itens" rotuloLink="Ver itens">
-          {(listaAbaixo.data ?? []).length === 0 ? (
-            <p className="p-4 text-sm text-muted-foreground">Nenhum item abaixo do mínimo.</p>
+        <Secao titulo="Acabou o estoque: repor" href="/itens" rotuloLink="Ver itens">
+          {(listaAcabou.data ?? []).length === 0 ? (
+            <p className="p-4 text-sm text-muted-foreground">Nenhum item acabou.</p>
           ) : (
             <ul className="divide-y">
-              {(listaAbaixo.data ?? []).map((i) => {
-                const saldo = Number(i.saldo_total ?? 0);
-                const minimo = Number(i.estoque_minimo ?? 0);
-                const pct = minimo > 0 ? Math.min(100, Math.round((saldo / minimo) * 100)) : 0;
-                return (
-                  <li key={i.id} className="space-y-1.5 px-4 py-3">
-                    <div className="flex items-baseline justify-between gap-2">
-                      <span className="min-w-0 truncate text-sm font-medium">{i.nome}</span>
-                      <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
-                        {formatarQuantidade(saldo)} / {formatarQuantidade(minimo)} {i.unidade}
-                      </span>
-                    </div>
-                    <div className="h-1.5 overflow-hidden rounded-full bg-secondary" aria-hidden="true">
-                      <div className="h-full rounded-full bg-amber-900/80" style={{ width: `${pct}%` }} />
-                    </div>
-                  </li>
-                );
-              })}
+              {(listaAcabou.data ?? []).map((i) => (
+                <li key={i.id} className="flex items-baseline justify-between gap-2 px-4 py-3">
+                  <span className="min-w-0 truncate text-sm font-medium">{i.nome}</span>
+                  <span className="shrink-0 font-mono text-xs text-muted-foreground">{i.codigo}</span>
+                </li>
+              ))}
+              {nAcabou > (listaAcabou.data ?? []).length ? (
+                <li className="px-4 py-2 text-xs text-muted-foreground">
+                  e mais {nAcabou - (listaAcabou.data ?? []).length}. Na tela Itens, marque “Só os que acabaram”.
+                </li>
+              ) : null}
             </ul>
           )}
         </Secao>

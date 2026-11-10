@@ -27,6 +27,7 @@ type FotoNova = { blob: Blob; previa: string };
 
 function traduzirErro(mensagem: string): string {
   if (mensagem.includes("row-level security")) return "Sem permissão para salvar itens.";
+  if (mensagem.includes("itens_codigo_key")) return "Esse código já existe. Tente salvar de novo.";
   return mensagem;
 }
 
@@ -59,12 +60,13 @@ function FormularioItem({
   } = useForm<DadosItem>({
     resolver: zodResolver(esquemaItem),
     defaultValues: {
+      prefixo_codigo: "",
       nome: item?.nome ?? "",
       categoria_id: item?.categoria_id ?? opcoesCategoria[0]?.id ?? "",
       unidade: item?.unidade ?? "un",
       tipo_controle: item?.tipo_controle ?? "consumivel",
       descricao: item?.descricao ?? "",
-      estoque_minimo: Number(item?.estoque_minimo ?? 0),
+      repor: item?.repor ?? true,
       especificacoes: jsonParaEspecificacoes(item?.especificacoes),
       ativo: item ? item.status === "ativo" : true,
     },
@@ -98,7 +100,7 @@ function FormularioItem({
       unidade: dados.unidade,
       tipo_controle: dados.tipo_controle,
       descricao: dados.descricao || null,
-      estoque_minimo: dados.estoque_minimo,
+      repor: dados.repor,
       especificacoes: especificacoesParaJson(dados.especificacoes),
       status: dados.ativo ? ("ativo" as const) : ("inativo" as const),
     };
@@ -112,7 +114,12 @@ function FormularioItem({
       if (!data || data.length === 0) return setErro("Sem permissão ou item não encontrado.");
       ({ id, codigo } = data[0]);
     } else {
-      const { data, error } = await supabase.from("itens").insert(campos).select("id, codigo").single();
+      // codigo = "" -> prefixo da categoria; "ALI" -> próximo ALI-NNN (o banco gera o número)
+      const { data, error } = await supabase
+        .from("itens")
+        .insert({ ...campos, codigo: dados.prefixo_codigo })
+        .select("id, codigo")
+        .single();
       if (error) return setErro(traduzirErro(error.message));
       ({ id, codigo } = data);
     }
@@ -159,12 +166,28 @@ function FormularioItem({
           Código <span className="font-mono font-semibold">{item.codigo}</span>: não muda, nem trocando a categoria.
         </p>
       ) : (
-        <p className="text-sm text-muted-foreground">O código (ex.: SEN-001) é gerado automaticamente pelo prefixo da categoria.</p>
+        <p className="text-sm text-muted-foreground">
+          O número do código é gerado automaticamente. Deixe o prefixo vazio para usar o da categoria (ex.: FER-021) ou
+          escreva um próprio (ex.: ALI vira ALI-004).
+        </p>
       )}
 
       <Campo id="nome" rotulo="Nome" erro={errors.nome?.message}>
         <Input id="nome" {...register("nome")} />
       </Campo>
+      {item ? null : (
+        <Campo id="prefixo_codigo" rotulo="Prefixo do código (opcional, 2 a 5 letras)" erro={errors.prefixo_codigo?.message}>
+          <Input
+            id="prefixo_codigo"
+            maxLength={5}
+            autoCapitalize="characters"
+            autoComplete="off"
+            placeholder="Prefixo da categoria"
+            className="font-mono uppercase"
+            {...register("prefixo_codigo")}
+          />
+        </Campo>
+      )}
       <Campo id="categoria_id" rotulo="Categoria" erro={errors.categoria_id?.message}>
         <Select id="categoria_id" {...register("categoria_id")}>
           {opcoesCategoria.map((c) => (
@@ -184,26 +207,16 @@ function FormularioItem({
             ))}
           </Select>
         </Campo>
-        <Campo id="estoque_minimo" rotulo="Estoque mínimo (0 = sem alerta)" erro={errors.estoque_minimo?.message}>
-          <Input
-            id="estoque_minimo"
-            type="number"
-            inputMode="decimal"
-            min={0}
-            step="any"
-            {...register("estoque_minimo", { valueAsNumber: true })}
-          />
+        <Campo id="tipo_controle" rotulo="Tipo de controle" erro={errors.tipo_controle?.message}>
+          <Select id="tipo_controle" disabled={travado} {...register("tipo_controle")}>
+            {TIPOS_CONTROLE.map((t) => (
+              <option key={t} value={t}>
+                {ROTULO_TIPO_CONTROLE[t]}
+              </option>
+            ))}
+          </Select>
         </Campo>
       </div>
-      <Campo id="tipo_controle" rotulo="Tipo de controle" erro={errors.tipo_controle?.message}>
-        <Select id="tipo_controle" disabled={travado} {...register("tipo_controle")}>
-          {TIPOS_CONTROLE.map((t) => (
-            <option key={t} value={t}>
-              {ROTULO_TIPO_CONTROLE[t]}
-            </option>
-          ))}
-        </Select>
-      </Campo>
       {travado ? (
         <p className="text-xs text-muted-foreground">
           Este item tem estoque ou empréstimo: unidade e tipo de controle não podem mudar.
@@ -280,6 +293,15 @@ function FormularioItem({
         </div>
       </fieldset>
 
+      <label className="flex items-start gap-2 text-sm">
+        <input type="checkbox" className="mt-1" {...register("repor")} />
+        <span>
+          Repor quando acabar
+          <span className="block text-xs text-muted-foreground">
+            Desmarcado = não terá mais no estoque: quando acabar, não aparece o aviso para repor.
+          </span>
+        </span>
+      </label>
       <label className="flex items-center gap-2 text-sm">
         <input type="checkbox" {...register("ativo")} />
         Item ativo (inativo some da lista padrão e não recebe entradas)
