@@ -21,7 +21,7 @@ Regra prática: se o nome existe no banco ou na vida da escola (perfil, item, pe
 src/
   app/                 rotas (cada pasta = uma URL)
     entrar/            login
-    cadastro/          criar conta
+    cadastro/          criar conta (nome, e-mail, turma opcional, senha)
     aguardando-aprovacao/   tela para quem ainda não foi aprovado
     sair/              POST: encerra a sessão
     (app)/             tudo aqui exige login + cadastro aprovado

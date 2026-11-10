@@ -41,7 +41,8 @@ export function FormularioEntrar() {
   }
 
   return (
-    <form onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
+    // method="post": se tocarem em Entrar antes da página carregar (rede lenta/túnel), a senha não vai para o endereço
+    <form method="post" onSubmit={handleSubmit(aoEnviar)} className="space-y-4" noValidate>
       <Campo id="email" rotulo="E-mail" erro={errors.email?.message}>
         <Input id="email" type="email" autoComplete="email" inputMode="email" {...register("email")} />
       </Campo>

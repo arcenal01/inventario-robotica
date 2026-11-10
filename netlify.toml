@@ -1,0 +1,14 @@
+# Configuração da Netlify para o Inventário Robótica (Next.js).
+# Passo a passo completo em docs/17-netlify.md.
+#
+# A Netlify detecta o Next.js sozinha e instala o adaptador. Aqui só fixamos o que importa:
+# a versão do Node (o projeto exige 22 ou mais) e o comando de build.
+#
+# As variáveis de ambiente (NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY) NÃO ficam
+# neste arquivo: são cadastradas no painel da Netlify (Site configuration > Environment variables).
+
+[build]
+  command = "npm run build"
+
+[build.environment]
+  NODE_VERSION = "22"

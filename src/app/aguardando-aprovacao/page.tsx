@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { Marca } from "@/components/marca";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BotaoAtualizar } from "@/features/auth/botao-atualizar";
 import { obterUsuarioEPerfil } from "@/lib/auth/perfil";
@@ -36,8 +37,9 @@ export default async function PaginaAguardandoAprovacao() {
   const texto = TEXTOS[perfil?.status_cadastro ?? "sem_perfil"];
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md items-center px-4 py-8">
-      <Card className="w-full">
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4 py-8">
+      <Marca className="justify-center" />
+      <Card className="w-full border-primary/20 shadow-xl shadow-black/20">
         <CardHeader>
           <CardTitle className="text-xl">{texto.titulo}</CardTitle>
           <CardDescription>{texto.descricao}</CardDescription>

@@ -1,32 +1,36 @@
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 import { criarClienteNavegador } from "@/lib/supabase/client";
 import type { Endereco, TipoEndereco } from "./arvore";
 
 /** Todos os endereços (ativos e inativos). Poucas centenas de linhas: carregamos tudo e montamos a árvore no cliente. */
+export const consultaEnderecos = queryOptions({
+  queryKey: ["enderecos"],
+  queryFn: async (): Promise<Endereco[]> => {
+    const { data, error } = await criarClienteNavegador().from("enderecos").select("*").order("codigo");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+});
+
 export function useEnderecos() {
-  return useQuery({
-    queryKey: ["enderecos"],
-    queryFn: async (): Promise<Endereco[]> => {
-      const { data, error } = await criarClienteNavegador().from("enderecos").select("*").order("codigo");
-      if (error) throw new Error(error.message);
-      return data ?? [];
-    },
-  });
+  return useQuery(consultaEnderecos);
 }
 
+export const consultaTiposEndereco = queryOptions({
+  queryKey: ["tipos_endereco"],
+  queryFn: async (): Promise<TipoEndereco[]> => {
+    const { data, error } = await criarClienteNavegador()
+      .from("tipos_endereco")
+      .select("*")
+      .order("nivel")
+      .order("nome");
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  },
+});
+
 export function useTiposEndereco() {
-  return useQuery({
-    queryKey: ["tipos_endereco"],
-    queryFn: async (): Promise<TipoEndereco[]> => {
-      const { data, error } = await criarClienteNavegador()
-        .from("tipos_endereco")
-        .select("*")
-        .order("nivel")
-        .order("nome");
-      if (error) throw new Error(error.message);
-      return data ?? [];
-    },
-  });
+  return useQuery(consultaTiposEndereco);
 }
 
 /** Quantidade de trocas de QR pendentes (só professor/admin conseguem ver). */
