@@ -1,6 +1,6 @@
 # PROGRESSO: Inventário Robótica
 
-Versão atual: v0.15.2 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
+Versão atual: v0.16.0 (padrão: v0.<bloco>.0; correções e sub-blocos = v0.<bloco>.1, .2...; v1.0.0 só na `main` ao final)
 Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com nome e versão continua opcional
 
 ## Blocos concluídos (Fase 1: banco COMPLETA; Fase 2: ambiente COMPLETA; Fase 3 em andamento)
@@ -12,6 +12,9 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Bloco 6: ambiente local e GitHub (docs/06-ambiente-local.md, package.json, scripts/rodar-testes.mjs, .env.example, .gitignore, .github/workflows/ci.yml e banco.yml, README.md)
 - Bloco 7: base do Next.js (docs/07-base-nextjs.md, src/, tests/schemas.test.mjs, supabase/testes/bloco7_testes.sql)
 - Bloco 8A: endereços e troca de QR (0005_trocas_qr.sql, bloco8a_testes.sql, src/features/enderecos, docs/08a-enderecos.md, tests/arvore.test.mjs)
+- Bloco 16A (v0.16.0): testes. Teste de ponta a ponta com navegador real (scripts/e2e.mjs, `npm run e2e`, 77 verificações: 21 telas como professor no PC, professor no celular de 390 px e aluno; cadastro com prefixo e foto; etiqueta; Ler QR; importação; aviso "acabou" e "não terá mais"; permissões do aluno), roteiro de teste no celular de verdade (docs/16a-testes.md) e abrir.bat/parar.bat para abrir o sistema com duplo clique. Resultado: npm test 82/82, typecheck, lint, build, db:testes 13/13 e e2e 77/77 passaram. Nenhuma correção de código foi necessária (as 2 falhas da primeira rodada eram do roteiro de teste). Ainda NÃO feito: o roteiro no celular de verdade (tabela da seção 3 do docs/16a-testes.md), que só o usuário consegue fazer
+- Bloco 15D (v0.15.4, pedido do usuário): "abaixo do estoque mínimo" substituído pelo aviso "acabou o estoque: repor", com a opção "não terá mais" (0012_aviso_acabou_estoque.sql: itens.repor + vw_itens_estoque.esgotado; bloco15d_acabou_estoque_testes.sql; lista, ficha e cadastro de itens; Início; seção 5 de docs/15c-codigo-importacao-etiquetas.md). npm test (82), typecheck, lint e db:testes (13 arquivos) OK; tipos regenerados (db:tipos)
+- Bloco 15C (v0.15.3, pedido do usuário): código de item com prefixo livre no estilo do site de coleta, importação da planilha de coleta e etiquetas de QR de item (0011_codigo_item_prefixo_livre.sql, bloco15c_codigo_prefixo_livre_testes.sql, src/features/itens/importacao.ts, importar-planilha.tsx, etiquetas.ts, rotas /itens/importar e /itens/etiquetas, botão Ler QR em Itens, docs/15c-codigo-importacao-etiquetas.md, tests/importacao.test.mjs). npm test (81), typecheck, lint e build OK; db:start aplicou 0001-0011 + seed e db:testes passou nos 12 arquivos (Docker Desktop 4.98 e Supabase CLI 2.122 no PC novo; Git ainda não instalado nele, então nada foi commitado)
 - Polimento de interface (v0.15.2, pedido do usuário: skill emil-design-eng): movimento e toque (globals.css, componentes ui, menu, cabeçalho, avisos)
 - Bloco 15B (v0.15.1): tela de Pendências para corrigir/reenviar/descartar contagens recusadas (rota /pendencias, src/features/offline/painel-pendencias.tsx, seção 7 de docs/15a-offline.md); sem migration
 - Bloco 15A (v0.15.0): uso offline com dados no aparelho e fila da contagem (0010_contagem_offline.sql, bloco15_testes.sql, src/features/offline, docs/15a-offline.md, tests/offline.test.mjs); biblioteca nova dexie
@@ -26,6 +29,8 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - v0.8.1 (validação do Bloco 6 no PC do usuário, CONCLUÍDA): repositório público https://github.com/arcenal01/inventario-robotica com main e homologacao; PR #1 (só para testar o CI) passou nos 2 workflows e foi fechado sem merge; Git 2.56, WSL2 e Docker Desktop 4.97 instalados; `supabase init` (config.toml); db:start aplicou 0001-0006 + seed; db:testes 7/7 arquivos OK; db:tipos gerou o database.ts oficial; .env.local criado; npm install, lint, typecheck, test e build OK; @supabase/ssr 0.6.1 -> 0.12.7; package-lock.json gerado; migration 0006 (código de item com 3 dígitos por prefixo) + bloco6_codigo_item_testes.sql; migration 0007 (perda idempotente em emprestimo_perdas + turma no cadastro) + bloco6b_perdas_turma_testes.sql; campo Turma no cadastro e na tela /usuarios; branches protegidas
 
 ## Decisões tomadas
+- Aviso de estoque (v0.15.4, pedido do usuário): a tela não usa mais estoque mínimo. Aviso só quando o item acaba (já teve saldo, saldo zero, nada emprestado), pedindo para repor; ou o item é marcado "não terá mais" (itens.repor = false) e o aviso some. estoque_minimo/abaixo_minimo ficam no banco sem uso (não quebra a 0008 nem o bloco8b)
+- Código de item (v0.15.3, pedido do usuário): mesmo estilo do site de coleta. Prefixo livre por item (2 a 5 letras), contador por prefixo como na 0006; vazio = prefixo da categoria. A importação grava o código da coleta como está (CHAV-001, ALI-001), e o contador avança. Etiquetas impressas só por este sistema (QR = só o código); as do site de coleta não valem (o QR delas é um link)
 - Primeiro admin criado manualmente por SQL; professor aprovado pelo admin
 - Professor só aprova/rejeita alunos; só admin muda perfil (trigger proteger_perfil)
 - Prefixos de categoria editáveis; unidades em lista fixa (un, m, kg); "un" só aceita quantidade inteira
@@ -200,6 +205,10 @@ Entrega: GitHub (https://github.com/arcenal01/inventario-robotica); o .zip com n
 - Biblioteca nova: qrcode.react
 
 ## Pendências
+- Bloco 16B (implantação local: modo produção, iniciar com o Windows, IP fixo, https para o celular) e 16C (backup agendado do banco e das fotos, com teste de restauração): aguardam autorização e respostas do usuário (qual computador hospeda, IP fixo no roteador)
+- Celular de verdade: fazer o roteiro da seção 3 do docs/16a-testes.md (câmera, instalar como app, offline, impressão da etiqueta)
+- Entrega: instalar o Git neste PC, enviar tudo ao GitHub (o repositório arcenal01/inventario-robotica está na v0.8.1; o trabalho até a v0.16.0 só existe neste PC e no Drive da escola) e só então preparar a v1.0.0
+- Teste de carga (turma inteira contando ao mesmo tempo): não feito
 - Túnel com endereço FIXO: precisa de conta Cloudflare + domínio próprio (decisão do usuário); com o túnel rápido o endereço muda a cada reinício e o app instalado precisa ser reinstalado
 - Nuvem: se a confirmação de e-mail estiver ligada, o cadastro mostra "confirme seu e-mail" (já tratado na tela)
 - Offline das telas de login/usuários: Blocos 14 e 15

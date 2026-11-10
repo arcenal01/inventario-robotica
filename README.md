@@ -30,7 +30,13 @@ npm run dev           # abre o app em http://localhost:3000
 - `docs/13-painel-relatorios.md`: painel do Início e relatórios em CSV/PDF
 - `docs/14-pwa-https.md`: instalar como app, cache, indicador de conexão e túnel https
 - `docs/15a-offline.md`: dados guardados no aparelho, consulta e contagem sem conexão, fila de envio
+- `docs/15c-codigo-importacao-etiquetas.md`: código com prefixo livre, importar a planilha de coleta, etiquetas de item e aviso de "acabou o estoque"
+- `docs/16a-testes.md`: testes automáticos, teste de ponta a ponta (`npm run e2e`) e roteiro no celular
 - `PROGRESSO.md`: o que já foi feito, decisões e pendências
+
+## Abrir o sistema com duplo clique (Windows)
+`abrir.bat` abre o Docker (se precisar), sobe o banco e o site e abre o navegador. `parar.bat` desliga o banco.
+Entrar com `prof@escola.local`, senha `Teste@12345` (usuários de teste do `seed.sql`).
 
 ## Branches
 `main` (produção) e `homologacao` (testes). Novidades saem de `homologacao` em `feature/*` ou `fix/*` e voltam por Pull Request.
