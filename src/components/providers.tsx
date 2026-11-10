@@ -1,0 +1,29 @@
+"use client";
+
+import { useEffect, useState, type ReactNode } from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { RegistrarServiceWorker } from "@/components/pwa";
+
+export function Providers({ children }: { children: ReactNode }) {
+  // useState garante um QueryClient por aba do navegador (e não um novo a cada render).
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { staleTime: 30_000, retry: 1 } },
+      }),
+  );
+
+  // Safari do iPhone só aplica :active (o "afundar" ao tocar) se a página escuta toques
+  useEffect(() => {
+    const nada = () => undefined;
+    document.addEventListener("touchstart", nada, { passive: true });
+    return () => document.removeEventListener("touchstart", nada);
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RegistrarServiceWorker />
+      {children}
+    </QueryClientProvider>
+  );
+}
